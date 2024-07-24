@@ -11,9 +11,11 @@ namespace UserMicroService.Core.Models
 
         [Required]
         [EmailAddress]
+        [StringLength(128)]
         public required string UserEmail { get; set; }
 
         [Required]
+        [StringLength(32)]
         public required string Password { get; set; }
     }
 }

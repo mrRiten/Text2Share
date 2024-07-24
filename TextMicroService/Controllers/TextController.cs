@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TextMicroService.Application.Services;
 using TextMicroService.Core.Models;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace TextMicroService.API.Controllers
 {
@@ -37,6 +36,7 @@ namespace TextMicroService.API.Controllers
 
         // POST api/<TextController>
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Post(TextUpload model)
         {
             await _textService.CreateTextAsync(model);
@@ -46,6 +46,7 @@ namespace TextMicroService.API.Controllers
 
         // PUT api/<TextController>/5
         [HttpPut("{id}")]
+        [Authorize]
         public async Task<IActionResult> Put(int id,TextUpload model)
         {
             await _textService.UpdateTextAsync(id, model);
@@ -55,6 +56,7 @@ namespace TextMicroService.API.Controllers
 
         // DELETE api/<TextController>/5
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete(int id)
         {
             await _textService.DeleteTextAsync(id);

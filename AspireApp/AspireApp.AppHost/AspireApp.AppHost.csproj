@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAspireHost>true</IsAspireHost>
+    <UserSecretsId>0bcb0054-6e96-4d1b-898a-0720b396d731</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.AppHost" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\AuthorizeMicroService.API\AuthorizeMicroService.API.csproj" />
+    <ProjectReference Include="..\..\EmailMicroService.API\EmailMicroService.API.csproj" />
+    <ProjectReference Include="..\..\TextMicroService\TextMicroService.API.csproj" />
+    <ProjectReference Include="..\..\UserMicroService.API\UserMicroService.API.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using UserMicroService.Application.Repositories;
+using UserMicroService.Application.Services;
 using UserMicroService.Core;
+using UserMicroService.Infrastructure.Repositories;
+using UserMicroService.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +14,9 @@ builder.Services.AddDbContext<UserMicroServiceContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("UserMicroService.API")),
         ServiceLifetime.Scoped);
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
