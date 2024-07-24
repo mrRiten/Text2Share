@@ -8,7 +8,7 @@ namespace EmailMicroService.Core.Models
         public int IdEmail { get; set; }
 
         [Required]
-        public int UserId { get; set; }
+        public required string UserEmail { get; set; }
 
         [Required]
         public required string Data { get; set; }

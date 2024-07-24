@@ -74,8 +74,8 @@ namespace AuthorizeMicroService.API.Controllers
 
                     var email = new Email
                     {
-                        UserId = newUser.IdUser,
-                        Data = $"Link to confirm: https://localhost:7240/api/Confirm/{newUser.IdUser}?token={newUser.ConfirmToken}",
+                        UserEmail = newUser.UserEmail,
+                        Data = $"Link to confirm: https://localhost:7054/api/Authorize/Confirm/{newUser.IdUser}?token={newUser.ConfirmToken}",
                     };
 
                     var emailContent = new StringContent(JsonConvert.SerializeObject(email), Encoding.UTF8, "application/json");

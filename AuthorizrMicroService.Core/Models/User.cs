@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using UserMicroService.Core.Attribute;
+using UserMicroService.Core.Attributes;
 
 namespace UserMicroService.Core.Models
 {
@@ -11,12 +11,12 @@ namespace UserMicroService.Core.Models
 
         [Required]
         [StringLength(128)]
-        [Unique(nameof(UserName))]
+        [UniqueUserName]
         public required string UserName { get; set; }
 
         [Required]
         [EmailAddress]
-        [Unique(nameof(UserEmail))]
+        [UniqueEmail]
         public required string UserEmail { get; set; }
 
         [Required]

@@ -1,4 +1,4 @@
-﻿using AuthorizeMicroService.Core.Attribute;
+﻿using AuthorizeMicroService.Core.Attributes;
 using System.ComponentModel.DataAnnotations;
 
 namespace AuthorizeMicroService.Core.Models
@@ -7,10 +7,12 @@ namespace AuthorizeMicroService.Core.Models
     {
         [Required]
         [StringLength(128)]
+        [UniqueUserName]
         public required string UserName { get; set; }
 
         [Required]
         [EmailAddress]
+        [UniqueEmail]
         [StringLength(128)]
         public required string UserEmail { get; set; }
 
