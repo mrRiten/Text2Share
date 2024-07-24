@@ -29,5 +29,9 @@ namespace AuthorizeMicroService.Core.Models
         [Required]
         [DefaultValue(false)]
         public bool IsEmailConfirmed { get; set; }
+
+        [Required]
+        [StringLength(256)]
+        public required string ConfirmToken { get; set; }
     }
 }

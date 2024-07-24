@@ -41,8 +41,9 @@ namespace UserMicroService.API.Controllers
             if (ModelState.IsValid)
             {
                 await _userService.CreateUserAsync(user);
-                
-                return Ok("RegisterSuccess");
+                var newUser = await _userService.GetUserAsync(user.UserName);
+
+                return Ok(newUser);
             }
 
             return BadRequest();

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using AuthorizeMicroService.Core.Attribute;
+using System.ComponentModel.DataAnnotations;
 
 namespace AuthorizeMicroService.Core.Models
 {

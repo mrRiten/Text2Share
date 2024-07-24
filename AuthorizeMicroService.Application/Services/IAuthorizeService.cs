@@ -5,6 +5,7 @@ namespace AuthorizeMicroService.Application.Services
     public interface IAuthorizeService
     {
         public bool VerifyUser(UserLogin userLogin, string userJson);
-        public string BuildUser(UserUpload upload);
+        public User BuildUser(UserUpload upload);
+        public Task<bool> Confirm(int userId, string token);
     }
 }

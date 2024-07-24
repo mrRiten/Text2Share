@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using UserMicroService.Core.Attribute;
 
 namespace UserMicroService.Core.Models
 {
@@ -10,10 +11,12 @@ namespace UserMicroService.Core.Models
 
         [Required]
         [StringLength(128)]
+        [Unique(nameof(UserName))]
         public required string UserName { get; set; }
 
         [Required]
         [EmailAddress]
+        [Unique(nameof(UserEmail))]
         public required string UserEmail { get; set; }
 
         [Required]
@@ -29,5 +32,9 @@ namespace UserMicroService.Core.Models
         [Required]
         [DefaultValue(false)]
         public bool IsEmailConfirmed { get; set; }
+
+        [Required]
+        [StringLength(256)]
+        public required string ConfirmToken { get; set; }
     }
 }
