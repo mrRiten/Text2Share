@@ -26,6 +26,12 @@ The project is built on a microservice architecture where each service performs 
 - **TextMicroService**: Manages texts that users can publish and share.
 - **UserMicroService**: Manages user data.
 
+All MicroServices has Onion Architecture:
+- **\<MicroServiceName>.Core** (Domain) contains: models, dbContext, attributes.
+- **\<MicroServiceName>.Application** contains: all services/repositories contracts (interfaces).
+- **\<MicroServiceName>.Infrastructure** contains: realization of contracts and HostHelpers.
+- **\<MicroServiceName>.API** contains: RESTfull API Controllers with methods, configure of MicroService. 
+
 ## Installation
 
 1. Clone the repository:
