@@ -50,10 +50,17 @@ namespace TextMicroService.Infrastructure.Repositories
             return await _context.Texts.FindAsync(id);
         }
 
+        public async Task<Text?> GetAsync(string token)
+        {
+            return await _context.Texts
+                .FirstOrDefaultAsync(t => t.PrivetToken == token);
+        }
+
         public async Task UpdateAsync(Text text)
         {
             _context.Update(text);
             await _context.SaveChangesAsync();
         }
+
     }
 }

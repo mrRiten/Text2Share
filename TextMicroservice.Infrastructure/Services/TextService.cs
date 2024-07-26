@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using k8s.Models;
+using System.Security.Cryptography;
 using TextMicroService.Application.Repositories;
 using TextMicroService.Application.Services;
 using TextMicroService.Core.Models;
@@ -42,31 +43,86 @@ namespace TextMicroService.Infrastructure.Services
 
         public async Task<ICollection<Text>> GetAllTextAsync(bool isAdmin)
         {
+            ICollection<Text> texts;
             if (isAdmin)
             {
-                return await _textRepository.AdminGetAllAsync();
+                texts = await _textRepository.AdminGetAllAsync();
             }
             else
             {
-                return await _textRepository.GetAllAsync();
+                texts = await _textRepository.GetAllAsync();
             }
+
+            foreach (var text in texts)
+            {
+                text.DeletePrivetToken();
+            }
+
+            return texts;
         }
 
         public async Task<ICollection<Text>> GetAllTextByUserAsync(int userId, bool isAdmin)
         {
+            ICollection<Text> texts;
             if (isAdmin)
             {
-                return await _textRepository.GetAllByUserAsync(userId);
+                texts = await _textRepository.GetAllByUserAsync(userId);
             }
             else
             {
-                return await _textRepository.GetAllPublicByUserAsync(userId);
+                texts = await _textRepository.GetAllPublicByUserAsync(userId);
+            }
+
+            foreach (var text in texts)
+            {
+                text.DeletePrivetToken();
+            }
+
+            return texts;
+        }
+
+        public async Task<ICollection<Text>> GetAllUserTextAsync(int userId)
+        {
+            var texts = await _textRepository.GetAllByUserAsync(userId);
+
+            foreach (var text in texts)
+            {
+                text.DeletePrivetToken();
+            }
+
+            return texts;
+        }
+
+        public async Task<Text?> GetTextAsync(int id, bool isAdmin)
+        {
+            if (isAdmin)
+            {
+                var text = await _textRepository.GetAsync(id);
+                
+                if (text == null) { return null; }
+                
+                text.DeletePrivetToken();
+
+                return text;
+            }
+            else
+            {
+                return null;
             }
         }
 
-        public async Task<Text?> GetTextAsync(int id)
+        public async Task<Text?> GetTextAsync(string privetToken)
         {
-            return await _textRepository.GetAsync(id);
+            return await _textRepository.GetAsync(privetToken);
+        }
+
+        public async Task<string?> GetTextTokenAsync(int textId)
+        {
+            var text = await _textRepository.GetAsync(textId);
+            
+            if (text == null) { return null; };
+
+            return text.PrivetToken;
         }
 
         public async Task UpdateTextAsync(int id, TextUpload model)

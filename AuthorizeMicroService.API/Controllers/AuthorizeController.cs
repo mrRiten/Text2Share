@@ -4,17 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using AuthorizeMicroService.Core.Models;
 using Newtonsoft.Json;
+using k8s.Models;
 
 namespace AuthorizeMicroService.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class AuthorizeController(IAuthorizeService authorizeService, HttpClient httpClient,
-        IJwtHelper jwtHelper) : ControllerBase
+        IJwtHelper jwtHelper, IHttpHelper httpHelper) : ControllerBase
     {
         private readonly IAuthorizeService _authorizeService = authorizeService;
         private readonly HttpClient _httpClient = httpClient;
         private readonly IJwtHelper _jwtHelper = jwtHelper;
+        private readonly IHttpHelper _httpHelper = httpHelper;
 
         // POST: api/<AuthorizeController>/Confirm/{userId}?token={token}
         [HttpGet("Confirm/{userId}")]
@@ -63,29 +65,16 @@ namespace AuthorizeMicroService.API.Controllers
             {
                 var user = _authorizeService.BuildUser(userUpload);
 
-                var userContent = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-                // Query to User Service for create user
-                var response = await _httpClient.PostAsync("https://localhost:7240/api/User", userContent);
+                var newUser = await _httpHelper.CreateUserAsync(user);
 
-                if (response.IsSuccessStatusCode)
+                if (newUser != null)
                 {
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    var newUser = JsonConvert.DeserializeObject<User>(responseContent);
+                    var response = await _httpHelper.CreateEmailAsync(newUser);
 
-                    var email = new Email
+                    if (response.IsSuccessStatusCode)
                     {
-                        UserEmail = newUser.UserEmail,
-                        Data = $"Link to confirm: https://localhost:7054/api/Authorize/Confirm/{newUser.IdUser}?token={newUser.ConfirmToken}",
-                    };
-
-                    var emailContent = new StringContent(JsonConvert.SerializeObject(email), Encoding.UTF8, "application/json");
-                    // Query to Email Service for create UserToSend
-                    response = await _httpClient.PostAsync("https://localhost:7187/api/Email", emailContent);
-                }
-
-                if (response.IsSuccessStatusCode)
-                {
-                    return Ok("User registered successfully.");
+                        return Ok("User registered successfully.");
+                    }
                 }
 
                 return BadRequest("Registration failed");  

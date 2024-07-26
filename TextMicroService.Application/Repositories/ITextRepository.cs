@@ -5,6 +5,7 @@ namespace TextMicroService.Application.Repositories
     public interface ITextRepository
     {
         public Task<Text?> GetAsync(int id);
+        public Task<Text?> GetAsync(string token);
         public Task<ICollection<Text>> GetAllAsync();
         public Task<ICollection<Text>> AdminGetAllAsync();
         public Task<ICollection<Text>> GetAllByUserAsync(int userId);

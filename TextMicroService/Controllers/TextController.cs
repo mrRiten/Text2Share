@@ -22,9 +22,10 @@ namespace TextMicroService.API.Controllers
 
         // GET api/<TextController>/5
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> Get(int id)
         {
-            var text = await _textService.GetTextAsync(id);
+            var text = await _textService.GetTextAsync(id, false);
 
             if (text == null)
             {
@@ -32,6 +33,28 @@ namespace TextMicroService.API.Controllers
             }
             
             return Ok(text);
+        }
+
+        // GET api/<TextController>?token=asd
+        [HttpGet]
+        public async Task<IActionResult> Get(string token)
+        {
+            var text = await _textService.GetTextAsync(token);
+
+            if (text == null) { return NotFound(); }
+
+            return Ok(text);
+        }
+
+        [HttpGet("/Token")]
+        [Authorize]
+        public async Task<IActionResult> GetToken(int textId)
+        {
+            var textToken = await _textService.GetTextTokenAsync(textId);
+
+            if (textToken == null) { return NotFound(); }
+
+            return Ok(textToken);
         }
 
         // POST api/<TextController>

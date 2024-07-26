@@ -30,5 +30,10 @@ namespace TextMicroService.Core.Models
         [NotNull]
         [Required]
         public required string PrivetToken { get; set; }
+
+        public void DeletePrivetToken()
+        {
+            PrivetToken = string.Empty;
+        }
     }
 }
