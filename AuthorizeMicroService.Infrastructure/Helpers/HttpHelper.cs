@@ -19,7 +19,7 @@ namespace AuthorizeMicroService.Infrastructure.Helpers
 
             var emailContent = new StringContent(JsonConvert.SerializeObject(email), Encoding.UTF8, "application/json");
             // Query to Email Service for create UserToSend
-            var response = await _httpClient.PostAsync("https://localhost:7187/api/Email", emailContent);
+            var response = await _httpClient.PostAsync("https://localhost:5004/api/Email", emailContent);
         
             return response;
         }
@@ -28,7 +28,7 @@ namespace AuthorizeMicroService.Infrastructure.Helpers
         {
             var userContent = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
             // Query to User Service for create user
-            var response = await _httpClient.PostAsync("https://localhost:7240/api/User", userContent);
+            var response = await _httpClient.PostAsync("https://localhost:5001/api/User", userContent);
 
             if (response.IsSuccessStatusCode)
             {

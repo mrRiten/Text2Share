@@ -41,11 +41,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EmailMicroService", "EmailM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailMicroService.API", "EmailMicroService.API\EmailMicroService.API.csproj", "{F87F7D2D-11D1-4761-9E1D-717A0C6546EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailMicroService.Core", "EmailMicroService.Core\EmailMicroService.Core.csproj", "{682FBEC0-4995-4E25-9807-A6572C117291}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailMicroService.Core", "EmailMicroService.Core\EmailMicroService.Core.csproj", "{682FBEC0-4995-4E25-9807-A6572C117291}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailMicroService.Application", "EmailMicroService.Application\EmailMicroService.Application.csproj", "{088AAEB0-F388-4D8D-AD15-F1DAAA577128}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailMicroService.Application", "EmailMicroService.Application\EmailMicroService.Application.csproj", "{088AAEB0-F388-4D8D-AD15-F1DAAA577128}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailMicroService.Infrastructure", "EmailMicroService.Infrastructure\EmailMicroService.Infrastructure.csproj", "{F08B6C57-A8A7-497A-9E90-39B06F04F2F2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EmailMicroService.Infrastructure", "EmailMicroService.Infrastructure\EmailMicroService.Infrastructure.csproj", "{F08B6C57-A8A7-497A-9E90-39B06F04F2F2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "APIGetWays", "APIGetWays\APIGetWays.csproj", "{1905693F-8AD8-4720-A71D-ACAAA1AC777C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -125,6 +127,10 @@ Global
 		{F08B6C57-A8A7-497A-9E90-39B06F04F2F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F08B6C57-A8A7-497A-9E90-39B06F04F2F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F08B6C57-A8A7-497A-9E90-39B06F04F2F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1905693F-8AD8-4720-A71D-ACAAA1AC777C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1905693F-8AD8-4720-A71D-ACAAA1AC777C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1905693F-8AD8-4720-A71D-ACAAA1AC777C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1905693F-8AD8-4720-A71D-ACAAA1AC777C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

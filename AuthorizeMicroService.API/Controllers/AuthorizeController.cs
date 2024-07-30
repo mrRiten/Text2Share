@@ -1,10 +1,7 @@
 ﻿using AuthorizeMicroService.Application.Helpers;
 using AuthorizeMicroService.Application.Services;
-using Microsoft.AspNetCore.Mvc;
-using System.Text;
 using AuthorizeMicroService.Core.Models;
-using Newtonsoft.Json;
-using k8s.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorizeMicroService.API.Controllers
 {
@@ -34,7 +31,7 @@ namespace AuthorizeMicroService.API.Controllers
             if (ModelState.IsValid)
             {
                 // Query to User Service for get user
-                var response = await _httpClient.GetAsync($"https://localhost:7240/api/User?userName={userLogin.Login}");
+                var response = await _httpClient.GetAsync($"https://localhost:7000/api/User?userName={userLogin.Login}");
 
                 if (response == null)
                 {
@@ -61,7 +58,7 @@ namespace AuthorizeMicroService.API.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register(UserUpload userUpload)
         {
-            if (ModelState.IsValid) 
+            if (ModelState.IsValid)
             {
                 var user = _authorizeService.BuildUser(userUpload);
 
@@ -77,7 +74,7 @@ namespace AuthorizeMicroService.API.Controllers
                     }
                 }
 
-                return BadRequest("Registration failed");  
+                return BadRequest("Registration failed");
             }
 
             return BadRequest(ModelState);
