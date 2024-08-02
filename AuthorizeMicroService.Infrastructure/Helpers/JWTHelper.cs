@@ -16,7 +16,7 @@ namespace AuthorizeMicroService.Infrastructure.Helpers
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userName),
+                new Claim(JwtRegisteredClaimNames.Name, userName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

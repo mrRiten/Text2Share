@@ -31,9 +31,10 @@ namespace AuthorizeMicroService.API.Controllers
             if (ModelState.IsValid)
             {
                 // Query to User Service for get user
-                var response = await _httpClient.GetAsync($"https://localhost:7000/api/User?userName={userLogin.Login}");
 
-                if (response == null)
+                var response = await _httpHelper.GetUserAsync(userLogin.Login);
+
+                if (!response.IsSuccessStatusCode)
                 {
                     return NotFound();
                 }

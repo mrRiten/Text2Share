@@ -40,5 +40,12 @@ namespace AuthorizeMicroService.Infrastructure.Helpers
 
             return null;
         }
+
+        public async Task<HttpResponseMessage> GetUserAsync(string username)
+        {
+            var response = await _httpClient.GetAsync($"https://localhost:7000/api/User?userName={username}");
+            
+            return response;
+        }
     }
 }

@@ -17,6 +17,7 @@
     <ProjectReference Include="..\..\APIGetWays\APIGetWays.csproj" />
     <ProjectReference Include="..\..\AuthorizeMicroService.API\AuthorizeMicroService.API.csproj" />
     <ProjectReference Include="..\..\EmailMicroService.API\EmailMicroService.API.csproj" />
+    <ProjectReference Include="..\..\LikeMicroService.API\LikeMicroService.API.csproj" />
     <ProjectReference Include="..\..\TextMicroService\TextMicroService.API.csproj" />
     <ProjectReference Include="..\..\UserMicroService.API\UserMicroService.API.csproj" />
   </ItemGroup>
