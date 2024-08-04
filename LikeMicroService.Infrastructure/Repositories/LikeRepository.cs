@@ -29,7 +29,7 @@ namespace LikeMicroService.Infrastructure.Repositories
 
         public async Task<Like?> GetAsync(int textId, int userId)
         {
-            return await _context.Likes.FirstOrDefaultAsync(l => l.TextId == textId || l.UserId == userId);
+            return await _context.Likes.FirstOrDefaultAsync(l => l.TextId == textId && l.UserId == userId);
         }
     }
 }

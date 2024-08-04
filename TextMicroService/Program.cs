@@ -9,6 +9,7 @@ using TextMicroService.Core;
 using TextMicroService.Core.Models;
 using TextMicroService.Infrastructure.Repositories;
 using TextMicroService.Infrastructure.Services;
+using Newtonsoft.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +24,8 @@ builder.Services.AddDbContext<TextMicroServiceContext>(options =>
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddScoped<ITextRepository, TextRepository>();
 builder.Services.AddScoped<ITextService, TextService>();
+
+builder.Services.Configure<XSource>(builder.Configuration.GetSection("SourceToken"));
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
@@ -46,7 +49,11 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+{
+    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(swaggerParameters =>

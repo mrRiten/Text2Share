@@ -1,5 +1,4 @@
-﻿using k8s.Models;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using TextMicroService.Application.Repositories;
 using TextMicroService.Application.Services;
 using TextMicroService.Core.Models;
@@ -27,7 +26,7 @@ namespace TextMicroService.Infrastructure.Services
                 DateOfCreate = DateTime.Now,
                 DateOfChange = DateTime.Now,
                 PrivetToken = BitConverter.ToString(randomBytes).Replace("-", "")
-        };
+            };
 
             await _textRepository.CreateAsync(text);
         }
@@ -98,9 +97,9 @@ namespace TextMicroService.Infrastructure.Services
             if (isAdmin)
             {
                 var text = await _textRepository.GetAsync(id);
-                
+
                 if (text == null) { return null; }
-                
+
                 text.DeletePrivetToken();
 
                 return text;
@@ -119,23 +118,14 @@ namespace TextMicroService.Infrastructure.Services
         public async Task<string?> GetTextTokenAsync(int textId)
         {
             var text = await _textRepository.GetAsync(textId);
-            
+
             if (text == null) { return null; };
 
             return text.PrivetToken;
         }
 
-        public async Task UpdateTextAsync(int id, TextUpload model)
+        public async Task UpdateTextAsync(Text text)
         {
-            var text = await _textRepository.GetAsync(id);
-            
-            if (text == null) { return; }
-
-            text.Data = model.Data;
-            text.IsPublic = model.IsPublic;
-            text.UserId = model.UserId;
-            text.DateOfChange = DateTime.Now;
-
             await _textRepository.UpdateAsync(text);
         }
     }

@@ -1,4 +1,5 @@
-﻿using TextMicroService.Core.Models;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using TextMicroService.Core.Models;
 
 namespace TextMicroService.Application.Services
 {
@@ -13,7 +14,7 @@ namespace TextMicroService.Application.Services
         public Task<string?> GetTextTokenAsync(int textId);
 
         public Task CreateTextAsync(TextUpload model);
-        public Task UpdateTextAsync(int id, TextUpload model);
+        public Task UpdateTextAsync(Text text);
         public Task DeleteTextAsync(int id);
     }
 }

@@ -30,6 +30,7 @@ builder.Services.AddScoped<ILikeService, LikeService>();
 builder.Services.AddScoped<IHttpHelper, HttpHelper>();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<XSource>(builder.Configuration.GetSection("SourceToken"));
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 

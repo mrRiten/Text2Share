@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" Version="8.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>

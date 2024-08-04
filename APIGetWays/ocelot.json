@@ -120,6 +120,7 @@
       "UpstreamPathTemplate": "/api/Text",
       "UpstreamHttpMethod": [ "GET" ]
     },
+
     {
       "DownstreamPathTemplate": "/api/Text/{id}",
       "DownstreamScheme": "https",
@@ -132,6 +133,7 @@
       "UpstreamPathTemplate": "/api/Text/{id}",
       "UpstreamHttpMethod": [ "GET" ]
     },
+
     {
       "DownstreamPathTemplate": "/api/Text/byToken/{token}",
       "DownstreamScheme": "https",
@@ -144,6 +146,7 @@
       "UpstreamPathTemplate": "/api/Text/byToken/{token}",
       "UpstreamHttpMethod": [ "GET" ]
     },
+
     {
       "DownstreamPathTemplate": "/api/Text/token/{textId}",
       "DownstreamScheme": "https",
@@ -156,6 +159,7 @@
       "UpstreamPathTemplate": "/api/Text/token/{textId}",
       "UpstreamHttpMethod": [ "GET" ]
     },
+
     {
       "DownstreamPathTemplate": "/api/Text",
       "DownstreamScheme": "https",
@@ -168,6 +172,7 @@
       "UpstreamPathTemplate": "/api/Text",
       "UpstreamHttpMethod": [ "POST" ]
     },
+
     {
       "DownstreamPathTemplate": "/api/Text/{id}",
       "DownstreamScheme": "https",
@@ -177,9 +182,10 @@
           "Port": 7002
         }
       ],
-      "UpstreamPathTemplate": "/api/Text/{id}",
-      "UpstreamHttpMethod": [ "PUT" ]
+      "UpstreamPathTemplate": "/api/text/{id}",
+      "UpstreamHttpMethod": [ "PATCH" ]
     },
+
     {
       "DownstreamPathTemplate": "/api/Text/{id}",
       "DownstreamScheme": "https",

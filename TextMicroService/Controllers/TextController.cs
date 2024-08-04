@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using TextMicroService.Application.Services;
 using TextMicroService.Core.Models;
 
@@ -7,14 +9,10 @@ namespace TextMicroService.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TextController : ControllerBase
+    public class TextController(ITextService textService, IOptions<XSource> source) : ControllerBase
     {
-        private readonly ITextService _textService;
-
-        public TextController(ITextService textService)
-        {
-            _textService = textService;
-        }
+        private readonly ITextService _textService = textService;
+        private readonly XSource _source = source.Value;
 
         // GET: api/Text
         [HttpGet]
@@ -26,10 +24,17 @@ namespace TextMicroService.API.Controllers
 
         // GET: api/Text/5
         [HttpGet("{id:int}")]
-        [Authorize]
         public async Task<IActionResult> Get(int id)
         {
-            var text = await _textService.GetTextAsync(id, false);
+            Text? text;
+            if (HttpContext.Request.Headers["X-Source"] == _source.Token)
+            {
+                text = await _textService.GetTextAsync(id, true);
+            }
+            else
+            {
+                text = await _textService.GetTextAsync(id, false);
+            }
 
             if (text == null)
             {
@@ -77,12 +82,31 @@ namespace TextMicroService.API.Controllers
             return Ok();
         }
 
-        // PUT: api/Text/5
-        [HttpPut("{id:int}")]
-        [Authorize]
-        public async Task<IActionResult> Put(int id, TextUpload model)
+        // PATCH: api/Text/5
+        [HttpPatch("{id:int}")]
+        public async Task<IActionResult> Patch(int id, [FromBody] JsonPatchDocument<Text> patchDoc)
         {
-            await _textService.UpdateTextAsync(id, model);
+            if (HttpContext.Request.Headers["X-Source"] != _source.Token) { return BadRequest(); }
+
+            if (patchDoc == null) { return BadRequest(); }
+
+            var text = await _textService.GetTextAsync(id, true);
+            text.PrivetToken = await _textService.GetTextTokenAsync(id);
+
+            if (text == null) { return NotFound(); }
+
+            patchDoc.ApplyTo(text, (patchError) =>
+            {
+                ModelState.AddModelError(patchError.AffectedObject.ToString(), patchError.ErrorMessage);
+            });
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            await _textService.UpdateTextAsync(text);
+
             return Ok();
         }
 

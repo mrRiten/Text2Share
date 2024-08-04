@@ -5,7 +5,6 @@ using LikeMicroService.Core.Models;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace LikeMicroService.Infrastructure.Services
 {
@@ -15,9 +14,6 @@ namespace LikeMicroService.Infrastructure.Services
         private readonly ILikeRepository _likeRepository = likeRepository;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly IHttpHelper _httpHelper = httpHelper;
-
-        // ToDo: Create getways validate system for identification source of requast (Source token)
-        // ToDo: Create method for update like count with request to UserMicroService
 
         public async Task CreateLikeAsync(int textId)
         {
@@ -30,6 +26,7 @@ namespace LikeMicroService.Infrastructure.Services
             if (like != null) { return; }
 
             await _likeRepository.CreateAsync(textId, user.IdUser);
+            await _httpHelper.EditTextLikeAsync(Core.Enums.LikeAction.Plus, textId);
         }
 
         public async Task DeleteLikeAsync(int textId)
