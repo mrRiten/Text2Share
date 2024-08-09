@@ -14,7 +14,7 @@ namespace LikeMicroService.Infrastructure.Helpers
 
         public async Task<HttpResponseMessage?> EditTextLikeAsync(LikeAction likeAction, int textId)
         {
-            // Создание запроса с методом PATCH
+            // Создание запроса с методом Get
             var request = new HttpRequestMessage(new HttpMethod("GET"), $"https://localhost:7000/api/Text/{textId}");
 
             // Добавление кастомного заголовка

@@ -94,34 +94,25 @@ namespace TextMicroService.Infrastructure.Services
 
         public async Task<Text?> GetTextAsync(int id, bool isAdmin)
         {
+            Text? text;
+
             if (isAdmin)
             {
-                var text = await _textRepository.GetAsync(id);
-
-                if (text == null) { return null; }
-
-                text.DeletePrivetToken();
-
-                return text;
+                text = await _textRepository.GetAsync(id);
             }
             else
             {
-                return null;
+                text = await _textRepository.GetPublicAsync(id);
             }
+
+            if (text != null) { return text; }
+
+            return text;
         }
 
         public async Task<Text?> GetTextAsync(string privetToken)
         {
             return await _textRepository.GetAsync(privetToken);
-        }
-
-        public async Task<string?> GetTextTokenAsync(int textId)
-        {
-            var text = await _textRepository.GetAsync(textId);
-
-            if (text == null) { return null; };
-
-            return text.PrivetToken;
         }
 
         public async Task UpdateTextAsync(Text text)

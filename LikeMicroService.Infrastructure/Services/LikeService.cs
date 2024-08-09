@@ -17,15 +17,19 @@ namespace LikeMicroService.Infrastructure.Services
 
         public async Task CreateLikeAsync(int textId)
         {
-            var user = await GetUserRequestDataAsync();
+            var userTask = GetUserRequestDataAsync();
+            var likeTask = GetLikeAsync(textId);
 
-            if (user == null) { return; }
+            await userTask;
+            await likeTask;
 
-            var like = await GetLikeAsync(textId);
+            await Task.WhenAll();
 
-            if (like != null) { return; }
+            if (userTask.Result == null) { return; }
 
-            await _likeRepository.CreateAsync(textId, user.IdUser);
+            if (likeTask.Result != null) { return; }
+
+            await _likeRepository.CreateAsync(textId, userTask.Result.IdUser);
             await _httpHelper.EditTextLikeAsync(Core.Enums.LikeAction.Plus, textId);
         }
 

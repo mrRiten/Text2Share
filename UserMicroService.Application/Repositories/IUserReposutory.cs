@@ -4,9 +4,10 @@ namespace UserMicroService.Application.Repositories
 {
     public interface IUserRepository
     {
-        public User? Get(int id);
+        public Task<User?> GetAsync(int id);
         public Task<User?> GetAsync(string userName);
 
         public Task CreateAsync(User user);
+        public Task UpdateAsync(User user);
     }
 }

@@ -56,6 +56,12 @@ namespace TextMicroService.Infrastructure.Repositories
                 .FirstOrDefaultAsync(t => t.PrivetToken == token);
         }
 
+        public async Task<Text?> GetPublicAsync(int id)
+        {
+            return await _context.Texts
+                .FirstOrDefaultAsync(t => t.IdText == id && t.IsPublic == true);
+        }
+
         public async Task UpdateAsync(Text text)
         {
             _context.Update(text);

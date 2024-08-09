@@ -63,7 +63,7 @@ namespace TextMicroService.API.Controllers
         [Authorize]
         public async Task<IActionResult> GetToken(int textId)
         {
-            var textToken = await _textService.GetTextTokenAsync(textId);
+            var textToken = (await _textService.GetTextAsync(textId, true))?.PrivetToken;
 
             if (textToken == null)
             {
@@ -91,7 +91,6 @@ namespace TextMicroService.API.Controllers
             if (patchDoc == null) { return BadRequest(); }
 
             var text = await _textService.GetTextAsync(id, true);
-            text.PrivetToken = await _textService.GetTextTokenAsync(id);
 
             if (text == null) { return NotFound(); }
 

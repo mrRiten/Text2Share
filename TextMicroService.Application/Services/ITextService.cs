@@ -11,8 +11,6 @@ namespace TextMicroService.Application.Services
         public Task<ICollection<Text>> GetAllTextAsync(bool isAdmin);
         public Task<ICollection<Text>> GetAllTextByUserAsync(int userId, bool isAdmin);
 
-        public Task<string?> GetTextTokenAsync(int textId);
-
         public Task CreateTextAsync(TextUpload model);
         public Task UpdateTextAsync(Text text);
         public Task DeleteTextAsync(int id);
