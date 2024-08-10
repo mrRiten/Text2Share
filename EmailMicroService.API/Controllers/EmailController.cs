@@ -1,5 +1,6 @@
 ﻿using EmailMicroService.Application.Services;
 using EmailMicroService.Core.Models;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmailMicroService.API.Controllers

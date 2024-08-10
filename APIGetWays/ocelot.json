@@ -54,6 +54,7 @@
         "AllowedScopes": []
       }
     },
+
     {
       "DownstreamPathTemplate": "/api/User",
       "DownstreamScheme": "https",
@@ -69,6 +70,24 @@
         "AllowedScopes": []
       }
     },
+
+    {
+      "DownstreamPathTemplate": "/api/User",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/User",
+      "UpstreamHttpMethod": [ "PATCH" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
+    },
+
     // AuthorizeMicroService
     {
       "DownstreamPathTemplate": "/api/Authorize/Confirm/{userId}",

@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using UserMicroService.Application.Services;
 using UserMicroService.Core.Models;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace UserMicroService.API.Controllers
 {
@@ -19,9 +16,9 @@ namespace UserMicroService.API.Controllers
 
         // GET: api/<UserController>/1
         [HttpGet("{userId}")]
-        public IActionResult Get(int userId)
+        public async Task<IActionResult> Get(int userId)
         {
-            var user = _userService.GetUserAsync(userId);
+            var user = await _userService.GetUserAsync(userId);
 
             if (user == null) { return NotFound(); }
 
@@ -56,6 +53,7 @@ namespace UserMicroService.API.Controllers
             return BadRequest();
         }
 
+        // PATCH: api/<UserController>/update
         [HttpPatch]
         [Authorize]
         public async Task<IActionResult> Patch([FromBody] JsonPatchDocument<User> patchDoc)

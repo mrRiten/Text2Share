@@ -17,12 +17,12 @@ namespace UserMicroService.Infrastructure.Repositories
 
         public async Task<User?> GetAsync(string userName)
         {
-            return await _context.Users.FirstOrDefaultAsync(x => x.UserName == userName);
+            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
         }
 
         public async Task<User?> GetAsync(int id)
         {
-            return await _context.Users.FindAsync(id);
+            return await _context.Users.FirstOrDefaultAsync(u => u.IdUser == id);
         }
 
         public async Task UpdateAsync(User user)
