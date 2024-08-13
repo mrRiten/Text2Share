@@ -88,6 +88,19 @@
       }
     },
 
+    {
+      "DownstreamPathTemplate": "/api/user/image",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7001
+        }
+      ],
+      "UpstreamPathTemplate": "/api/user/image",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+
     // AuthorizeMicroService
     {
       "DownstreamPathTemplate": "/api/Authorize/Confirm/{userId}",

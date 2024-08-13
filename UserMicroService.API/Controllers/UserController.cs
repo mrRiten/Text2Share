@@ -9,10 +9,13 @@ namespace UserMicroService.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController(IUserService userService, IOptions<XSource> source) : ControllerBase
+    public class UserController(IUserService userService, IImageService imageService, 
+        IOptions<XSource> source, IWebHostEnvironment webEnvironment) : ControllerBase
     {
         private readonly IUserService _userService = userService;
+        private readonly IImageService _imageService = imageService;
         private readonly XSource _source = source.Value;
+        private readonly IWebHostEnvironment _webHostEnvironment = webEnvironment;
 
         // GET: api/<UserController>/1
         [HttpGet("{userId}")]
@@ -29,11 +32,22 @@ namespace UserMicroService.API.Controllers
         [HttpGet]
         public async Task<IActionResult> Get(string userName)
         {
-            var user = await _userService.GetUserAsync(userName);
+            if (HttpContext.Request.Headers["X-Source"] == _source.Token)
+            {
+                var user = await _userService.GetFullUserAsync(userName);
 
-            if (user == null) { return NotFound(); }
+                if (user == null) { return NotFound(); }
 
-            return Ok(user);
+                return Ok(user);
+            }
+            else
+            {
+                var user = await _userService.GetUserAsync(userName);
+
+                if (user == null) { return NotFound(); }
+
+                return Ok(user);
+            }
         }
 
         // POST: api/<UserController>/
@@ -53,12 +67,50 @@ namespace UserMicroService.API.Controllers
             return BadRequest();
         }
 
+        [HttpPost("image")]
+        [Authorize]
+        public async Task<IActionResult> PostImage([FromForm] UploadUserImage userImage)
+        {
+            try
+            {
+                var imageUrlTask = _imageService.UploadUserImageAsync(userImage.Image);
+                var userTask = _userService.GetFullUserAsync();
+
+                await Task.WhenAll(imageUrlTask, userTask);
+
+                var imageUrl = await imageUrlTask;
+                var user = await userTask;
+
+                user.UserImagePath = imageUrl;
+
+                await _userService.UpdateUserAsync(user);
+
+                return Ok("User's image updated");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         // PATCH: api/<UserController>/update
         [HttpPatch]
         [Authorize]
         public async Task<IActionResult> Patch([FromBody] JsonPatchDocument<User> patchDoc)
         {
-            var user = await _userService.GetUserAsync();
+            foreach (var operation in patchDoc.Operations)
+            {
+                if (!_userService.IsAllowedPath(operation.path))
+                {
+                    return BadRequest($"Modification of the '{operation.path}' field is not allowed.");
+                }
+            }
+
+            var user = await _userService.GetFullUserAsync();
 
             if (user == null) { return NotFound(); }
 

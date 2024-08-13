@@ -1,13 +1,15 @@
 ﻿using AuthorizeMicroService.Application.Helpers;
 using AuthorizeMicroService.Core.Models;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System.Text;
 
 namespace AuthorizeMicroService.Infrastructure.Helpers
 {
-    public class HttpHelper(HttpClient httpClient) : IHttpHelper
+    public class HttpHelper(HttpClient httpClient, IOptions<XSource> options) : IHttpHelper
     {
         private readonly HttpClient _httpClient = httpClient;
+        private readonly XSource _source = options.Value;
 
         public async Task<HttpResponseMessage> CreateEmailAsync(User user)
         {
@@ -43,7 +45,16 @@ namespace AuthorizeMicroService.Infrastructure.Helpers
 
         public async Task<HttpResponseMessage> GetUserAsync(string username)
         {
-            var response = await _httpClient.GetAsync($"https://localhost:7000/api/User?userName={username}");
+            // Создание запроса с методом Get
+            var request = new HttpRequestMessage(new HttpMethod("GET"), $"https://localhost:7000/api/User?userName={username}");
+
+            // Добавление кастомного заголовка
+            request.Headers.Add("X-Source", _source.Token);
+
+            // Отправка запроса
+            var response = await _httpClient.SendAsync(request);
+
+            //var response = await _httpClient.GetAsync($"https://localhost:7000/api/User?userName={username}");
             
             return response;
         }

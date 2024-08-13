@@ -23,6 +23,8 @@ builder.Services.AddScoped<IHttpHelper, HttpHelper>();
 
 builder.Services.AddHttpClient();
 
+builder.Services.Configure<XSource>(builder.Configuration.GetSection("SourceToken"));
+
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 
 builder.Services.AddAuthentication(options =>

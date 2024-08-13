@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 using UserMicroService.Application.Helpers;
 using UserMicroService.Application.Repositories;
@@ -13,26 +12,58 @@ namespace UserMicroService.Infrastructure.Services
     {
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
-        private readonly IHttpHelper _httpHelper = httpHelper;
 
         public async Task CreateUserAsync(User user)
         {
             await _userRepository.CreateAsync(user);
         }
 
-        public async Task<User?> GetUserAsync(string userName)
+        public async Task<User?> GetFullUserAsync()
+        {
+            return await GetUserRequestDataAsync();
+        }
+
+        public async Task<User?> GetFullUserAsync(string userName)
         {
             return await _userRepository.GetAsync(userName);
         }
 
-        public async Task<User?> GetUserAsync(int userId)
+        public async Task<UserDTO?> GetUserAsync(string userName)
         {
-            return await _userRepository.GetAsync(userId);
+            var user = await _userRepository.GetAsync(userName);
+
+            if (user == null) { return null; }
+
+            var userDTO = new UserDTO(user);
+
+            return userDTO;
         }
 
-        public async Task<User?> GetUserAsync()
+        public async Task<UserDTO?> GetUserAsync(int userId)
         {
-            return await GetUserRequestDataAsync();
+            var user = await _userRepository.GetAsync(userId);
+
+            if (user == null) { return null; }
+
+            var userDTO = new UserDTO(user);
+
+            return userDTO;
+        }
+
+        public async Task<UserDTO?> GetUserAsync()
+        {
+            var user = await GetUserRequestDataAsync();
+
+            if (user == null) { return null; }
+
+            var userDTO = new UserDTO(user);
+
+            return userDTO;
+        }
+
+        public bool IsAllowedPath(string path)
+        {
+            return path.Equals("/UserName", StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task UpdateUserAsync(User user)
@@ -44,17 +75,11 @@ namespace UserMicroService.Infrastructure.Services
         {
             var userName = _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Name)?.Value;
 
-            var response = await _httpHelper.GetUserAsync(userName);
+            if (userName == null) { return null; }
 
-            if (response.IsSuccessStatusCode)
-            {
-                var userJson = await response.Content.ReadAsStringAsync();
-                var user = JsonConvert.DeserializeObject<User>(userJson);
+            var user = await _userRepository.GetAsync(userName);
 
-                return user;
-            }
-
-            return null;
+            return user;
         }
     }
 }

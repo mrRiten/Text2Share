@@ -26,4 +26,9 @@
     <ProjectReference Include="..\UserMicroService.Infrastructure\UserMicroService.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+    <Folder Include="wwwroot\uploads\" />
+  </ItemGroup>
+
 </Project>
