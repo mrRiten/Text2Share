@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using TextMicroService.Application.Services;
+using TextMicroService.Core.Attributes;
 using TextMicroService.Core.Models;
 
 namespace TextMicroService.API.Controllers
@@ -84,10 +85,9 @@ namespace TextMicroService.API.Controllers
 
         // PATCH: api/Text/5
         [HttpPatch("{id:int}")]
+        [ServiceFilter(typeof(ValidateSourceFilter))]
         public async Task<IActionResult> Patch(int id, [FromBody] JsonPatchDocument<Text> patchDoc)
         {
-            if (HttpContext.Request.Headers["X-Source"] != _source.Token) { return BadRequest(); }
-
             if (patchDoc == null) { return BadRequest(); }
 
             var text = await _textService.GetTextAsync(id, true);

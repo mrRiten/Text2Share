@@ -27,8 +27,9 @@
       "UpstreamPathTemplate": "/api/like/{textId}",
       "UpstreamHttpMethod": [ "GET" ]
     },
+
     {
-      "DownstreamPathTemplate": "/api/Like/SetLike",
+      "DownstreamPathTemplate": "/api/Like/{textId}",
       "DownstreamScheme": "https",
       "DownstreamHostAndPorts": [
         {
@@ -36,9 +37,10 @@
           "Port": 7005
         }
       ],
-      "UpstreamPathTemplate": "/api/like/SetLike",
+      "UpstreamPathTemplate": "/api/like/{textId}",
       "UpstreamHttpMethod": [ "POST" ]
     },
+
     {
       "DownstreamPathTemplate": "/api/Like/{textId}",
       "DownstreamScheme": "https",

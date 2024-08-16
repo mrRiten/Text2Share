@@ -9,6 +9,7 @@ using UserMicroService.Application.Helpers;
 using UserMicroService.Application.Repositories;
 using UserMicroService.Application.Services;
 using UserMicroService.Core;
+using UserMicroService.Core.Attributes;
 using UserMicroService.Core.Models;
 using UserMicroService.Infrastructure.Helpers;
 using UserMicroService.Infrastructure.Repositories;
@@ -31,6 +32,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IHttpHelper, HttpHelper>();
 builder.Services.AddScoped<IImageService, ImageService>();
+
+builder.Services.AddScoped<ValidateSourceFilter>();
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<XSource>(builder.Configuration.GetSection("SourceToken"));
@@ -57,10 +60,14 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddControllers().AddNewtonsoftJson(options =>
+builder.Services.AddControllers(options =>
 {
-    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-});
+    options.Filters.AddService<ValidateSourceFilter>();
+})
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver(); // Настройки сериализации
+    });
 
 builder.Services.Configure<FormOptions>(fo => fo.MultipartBodyLengthLimit = 104857600); // Limit of body-request 100 MB
 

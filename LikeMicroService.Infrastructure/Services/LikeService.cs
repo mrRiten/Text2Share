@@ -15,41 +15,81 @@ namespace LikeMicroService.Infrastructure.Services
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
         private readonly IHttpHelper _httpHelper = httpHelper;
 
-        public async Task CreateLikeAsync(int textId)
+        // Test Code
+        public async Task ModifyLikeAsync(int textId, bool isLike)
         {
             var userTask = GetUserRequestDataAsync();
             var likeTask = GetLikeAsync(textId);
 
-            await userTask;
-            await likeTask;
+            var user = await userTask;
+            var like = await likeTask;
 
-            await Task.WhenAll();
+            if (user == null || (isLike && like != null) || (!isLike && like == null))
+            {
+                return;
+            }
 
-            if (userTask.Result == null) { return; }
+            var likeAction = isLike ? Core.Enums.LikeAction.Plus : Core.Enums.LikeAction.Minus;
+            
+            var repositoryTask = isLike ? _likeRepository.CreateAsync(textId, user.Id)
+                                        : _likeRepository.DeleteAsync(textId, user.Id);
+            var editTask = _httpHelper.EditTextLikeAsync(likeAction, textId);
 
-            if (likeTask.Result != null) { return; }
-
-            await _likeRepository.CreateAsync(textId, userTask.Result.IdUser);
-            await _httpHelper.EditTextLikeAsync(Core.Enums.LikeAction.Plus, textId);
+            await Task.WhenAll(repositoryTask, editTask);
         }
 
-        public async Task DeleteLikeAsync(int textId)
+        public Task CreateLikeAsync(int textId)
         {
-            var user = await GetUserRequestDataAsync();
-
-            if (user == null) { return; }
-
-            await _likeRepository.DeleteAsync(textId, user.IdUser);
+            return ModifyLikeAsync(textId, true);
         }
+
+        public Task DeleteLikeAsync(int textId)
+        {
+            return ModifyLikeAsync(textId, false);
+        }
+
+        //public async Task CreateLikeAsync(int textId)
+        //{
+        //    var userTask = GetUserRequestDataAsync();
+        //    var likeTask = GetLikeAsync(textId);
+
+        //    await Task.WhenAll(userTask, likeTask);
+
+        //    if (userTask.Result == null) { return; }
+
+        //    if (likeTask.Result != null) { return; }
+
+        //    var createTask = _likeRepository.CreateAsync(textId, userTask.Result.Id);
+        //    var editTask = _httpHelper.EditTextLikeAsync(Core.Enums.LikeAction.Plus, textId);
+
+        //    await Task.WhenAll(createTask, editTask);
+        //}
+
+        //public async Task DeleteLikeAsync(int textId)
+        //{
+        //    var userTask = GetUserRequestDataAsync();
+        //    var likeTask = GetLikeAsync(textId);
+
+        //    await Task.WhenAll(userTask, likeTask);
+
+        //    if (userTask.Result == null) { return; }
+
+        //    if (likeTask.Result == null) { return; }
+
+        //    var editTask = _httpHelper.EditTextLikeAsync(Core.Enums.LikeAction.Minus, textId);
+        //    var deleteTask = _likeRepository.DeleteAsync(textId, userTask.Result.Id);
+
+        //    await Task.WhenAll(editTask, deleteTask);
+        //}
 
         public async Task<Like?> GetLikeAsync(int textId)
         {
             var user = await GetUserRequestDataAsync();
 
-            return await _likeRepository.GetAsync(textId, user.IdUser);
+            return await _likeRepository.GetAsync(textId, user.Id);
         }
 
-        private async Task<User?> GetUserRequestDataAsync()
+        private async Task<UserDTO?> GetUserRequestDataAsync()
         {
             var userName = _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Name)?.Value;
 
@@ -58,7 +98,7 @@ namespace LikeMicroService.Infrastructure.Services
             if (response.IsSuccessStatusCode)
             {
                 var userJson = await response.Content.ReadAsStringAsync();
-                var user = JsonConvert.DeserializeObject<User>(userJson);
+                var user = JsonConvert.DeserializeObject<UserDTO>(userJson);
 
                 return user;
             }

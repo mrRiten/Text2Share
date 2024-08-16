@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using UserMicroService.Application.Services;
+using UserMicroService.Core.Attributes;
 using UserMicroService.Core.Models;
 
 namespace UserMicroService.API.Controllers
@@ -52,10 +53,9 @@ namespace UserMicroService.API.Controllers
 
         // POST: api/<UserController>/
         [HttpPost]
+        [ServiceFilter(typeof(ValidateSourceFilter))]
         public async Task<IActionResult> Post(User user)
         {
-            if (HttpContext.Request.Headers["X-Source"] != _source.Token) { return BadRequest(); }
-
             if (ModelState.IsValid)
             {
                 await _userService.CreateUserAsync(user);
@@ -80,6 +80,8 @@ namespace UserMicroService.API.Controllers
 
                 var imageUrl = await imageUrlTask;
                 var user = await userTask;
+
+                if (user == null) { return NotFound("User is not found"); }
 
                 user.UserImagePath = imageUrl;
 

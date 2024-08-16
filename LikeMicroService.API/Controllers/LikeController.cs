@@ -1,6 +1,7 @@
 ﻿using LikeMicroService.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel;
 
 namespace LikeMicroService.API.Controllers
 {
@@ -22,8 +23,8 @@ namespace LikeMicroService.API.Controllers
             return Ok(like);
         }
 
-        // POST api/<LikeController>/SetLike?textId=5
-        [HttpPost("SetLike")]
+        // POST api/<LikeController>/5
+        [HttpPost("{textId}")]
         public async Task<IActionResult> Post(int textId)
         {
             await _likeService.CreateLikeAsync(textId);
