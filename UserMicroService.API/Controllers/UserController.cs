@@ -67,7 +67,7 @@ namespace UserMicroService.API.Controllers
             return BadRequest();
         }
 
-        [HttpPost("image")]
+        [HttpPost("Image")]
         [Authorize]
         public async Task<IActionResult> PostImage([FromForm] UploadUserImage userImage)
         {
@@ -97,16 +97,37 @@ namespace UserMicroService.API.Controllers
             }
         }
 
+        [HttpPost("ChangePassword")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromForm] string newPassword, [FromForm] string oldPassword)
+        {
+            var user = await _userService.GetFullUserAsync();
+
+            if (user == null) { return NotFound("User is not found"); }
+
+            var result = await _userService.SetNewPassword(oldPassword, newPassword, user);
+
+            if (!result)
+            {
+                return Ok("Old password is not valid");
+            }
+
+            return Ok("Password is change");
+        }
+
         // PATCH: api/<UserController>/update
         [HttpPatch]
         [Authorize]
         public async Task<IActionResult> Patch([FromBody] JsonPatchDocument<User> patchDoc)
         {
-            foreach (var operation in patchDoc.Operations)
+            if (HttpContext.Request.Headers["X-Source"] != _source.Token)
             {
-                if (!_userService.IsAllowedPath(operation.path))
+                foreach (var operation in patchDoc.Operations)
                 {
-                    return BadRequest($"Modification of the '{operation.path}' field is not allowed.");
+                    if (!_userService.IsAllowedPath(operation.path))
+                    {
+                        return BadRequest($"Modification of the '{operation.path}' field is not allowed.");
+                    }
                 }
             }
 
@@ -128,6 +149,8 @@ namespace UserMicroService.API.Controllers
 
             return Ok();
         }
+
+
 
     }
 }

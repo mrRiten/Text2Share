@@ -12,6 +12,7 @@ namespace UserMicroService.Application.Services
         public Task<User?> GetFullUserAsync(string userName);
 
         public bool IsAllowedPath(string path);
+        public Task<bool> SetNewPassword(string oldPassword, string newPassword, User user);
 
         public Task CreateUserAsync(User user);
         public Task UpdateUserAsync(User user);

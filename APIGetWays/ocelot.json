@@ -1,5 +1,19 @@
 {
   "Routes": [
+    // EmailMicroService
+    {
+      "DownstreamPathTemplate": "/api/Email",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7004
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Email",
+      "UpstreamHttpMethod": [ "POST" ]
+    },
+
     // LikeMicroService
     {
       "DownstreamPathTemplate": "/api/Like/{textId}",

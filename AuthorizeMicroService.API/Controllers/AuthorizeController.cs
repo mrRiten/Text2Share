@@ -30,18 +30,11 @@ namespace AuthorizeMicroService.API.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Query to User Service for get user
+                var user = await _authorizeService.GetUserAsync(userLogin.Login);
 
-                var response = await _httpHelper.GetUserAsync(userLogin.Login);
+                if (user == null) { return NotFound("User is not found"); }
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    return NotFound();
-                }
-
-                var userJson = await response.Content.ReadAsStringAsync();
-
-                var result = _authorizeService.VerifyUser(userLogin, userJson);
+                var result = _authorizeService.VerifyUser(userLogin, user);
 
                 if (result)
                 {
@@ -49,7 +42,7 @@ namespace AuthorizeMicroService.API.Controllers
                     return Ok(jwtToken);
                 }
 
-                return NotFound();
+                return BadRequest("Password is not valid");
             }
 
             return BadRequest(ModelState);
@@ -57,22 +50,22 @@ namespace AuthorizeMicroService.API.Controllers
 
         // POST: api/<AuthorizeController>/Register
         [HttpPost("Register")]
-        public async Task<IActionResult> Register(UserUpload userUpload)
+        public async Task<IActionResult> Register([FromForm] UserUpload userUpload)
         {
             if (ModelState.IsValid)
             {
                 var user = _authorizeService.BuildUser(userUpload);
 
-                var newUser = await _httpHelper.CreateUserAsync(user);
+                await _authorizeService.CreateUserAsync(user);
+                user = await _authorizeService.GetUserAsync(user.UserName); // Get user with ID
 
-                if (newUser != null)
+                if (user == null) { return BadRequest("Registration failed"); }
+
+                var response = await _httpHelper.CreateEmailAsync(user);
+
+                if (response.IsSuccessStatusCode)
                 {
-                    var response = await _httpHelper.CreateEmailAsync(newUser);
-
-                    if (response.IsSuccessStatusCode)
-                    {
-                        return Ok("User registered successfully.");
-                    }
+                    return Ok("User registered successfully.");
                 }
 
                 return BadRequest("Registration failed");

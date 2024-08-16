@@ -47,11 +47,25 @@ namespace AuthorizeMicroService.Infrastructure.Services
             return true;
         }
 
-        public bool VerifyUser(UserLogin userLogin, string userJson)
+        public async Task<User?> GetUserAsync(string login)
         {
-            var user = JsonConvert.DeserializeObject<User>(userJson);
+            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == login ||
+                u.UserEmail == login);
+        }
 
+        public async Task CreateUserAsync(User user)
+        {
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+        }
+
+        public bool VerifyUser(UserLogin userLogin, User user)
+        {
             if (user == null || !BCrypt.Net.BCrypt.Verify(userLogin.Password, user.Password)) { return false; }
+
+            user.LastLoginDate = DateTime.Now;
+            _context.Users.Update(user);
+            _context.SaveChanges();
 
             return true;
         }

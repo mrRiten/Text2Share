@@ -66,6 +66,16 @@ namespace UserMicroService.Infrastructure.Services
             return path.Equals("/UserName", StringComparison.OrdinalIgnoreCase);
         }
 
+        public async Task<bool> SetNewPassword(string oldPassword, string newPassword, User user)
+        {
+            if (!BCrypt.Net.BCrypt.Verify(oldPassword, user.Password)) { return false; }
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            await _userRepository.UpdateAsync(user);
+
+            return true;
+        }
+
         public async Task UpdateUserAsync(User user)
         {
             await _userRepository.UpdateAsync(user);
