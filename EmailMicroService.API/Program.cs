@@ -1,6 +1,7 @@
 using EmailMicroService.Application.Repositories;
 using EmailMicroService.Application.Services;
 using EmailMicroService.Core;
+using EmailMicroService.Core.Attributes;
 using EmailMicroService.Core.Models;
 using EmailMicroService.Infrastructure.Repositories;
 using EmailMicroService.Infrastructure.Services;
@@ -17,16 +18,21 @@ builder.Services.AddDbContext<EmailMicroServiceContext>(options =>
         b => b.MigrationsAssembly("EmailMicroService.API")),
         ServiceLifetime.Scoped);
 
-builder.Services.Configure<SMTP>(builder.Configuration.GetSection("SMTP"));
-
 builder.Services.AddHostedService<EmailBackgroundService>();
 builder.Services.AddScoped<IEmailRepository, EmailRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IEmailSenderService, EmailSenderService>();
 
+builder.Services.AddScoped<ValidateSourceFilter>();
+
+builder.Services.Configure<SMTP>(builder.Configuration.GetSection("SMTP"));
+builder.Services.Configure<XSource>(builder.Configuration.GetSection("SourceToken"));
+
 builder.Services.AddHttpClient();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+    options.Filters.AddService<ValidateSourceFilter>()
+);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

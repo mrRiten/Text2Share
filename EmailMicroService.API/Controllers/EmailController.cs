@@ -1,6 +1,6 @@
 ﻿using EmailMicroService.Application.Services;
+using EmailMicroService.Core.Attributes;
 using EmailMicroService.Core.Models;
-using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmailMicroService.API.Controllers
@@ -13,6 +13,7 @@ namespace EmailMicroService.API.Controllers
 
         // POST api/<EmailController>
         [HttpPost]
+        [ServiceFilter(typeof(ValidateSourceFilter))]
         public async Task<IActionResult> Post(Email email)
         {
             await _emailService.CreateEmailAsync(email);

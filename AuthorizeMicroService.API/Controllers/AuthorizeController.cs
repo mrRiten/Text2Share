@@ -26,7 +26,7 @@ namespace AuthorizeMicroService.API.Controllers
 
         // POST: api/<AuthorizeController>/Login
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(UserLogin userLogin)
+        public async Task<IActionResult> Login([FromForm] UserLogin userLogin)
         {
             if (ModelState.IsValid)
             {

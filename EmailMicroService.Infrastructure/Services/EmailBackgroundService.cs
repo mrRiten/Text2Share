@@ -47,7 +47,15 @@ namespace EmailMicroService.Infrastructure.Services
 
                 foreach (var email in emails)
                 {
-                    await emailSenderService.SendEmailAsync(email.UserEmail, "Confirm", email.Data);
+                    try
+                    {
+                        await emailSenderService.SendEmailAsync(email.UserEmail, "Confirm", email.Data);
+                    }
+                    catch (MimeKit.ParseException)
+                    {
+                        continue;
+                    }
+                    
                 }
 
                 await emailRepository.DeleteAsync([.. emails]);

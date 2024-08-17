@@ -20,9 +20,15 @@ namespace AuthorizeMicroService.Infrastructure.Helpers
             };
 
             var emailContent = new StringContent(JsonConvert.SerializeObject(email), Encoding.UTF8, "application/json");
-            // Query to Email Service for create UserToSend
-            var response = await _httpClient.PostAsync("https://localhost:7000/api/Email", emailContent);
-        
+
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://localhost:7000/api/Email")
+            {
+                Content = emailContent
+            };
+            request.Headers.Add("X-Source", _source.Token);
+
+            var response = await _httpClient.SendAsync(request);
+
             return response;
         }
 
@@ -45,16 +51,10 @@ namespace AuthorizeMicroService.Infrastructure.Helpers
 
         public async Task<HttpResponseMessage> GetUserAsync(string username)
         {
-            // Создание запроса с методом Get
             var request = new HttpRequestMessage(new HttpMethod("GET"), $"https://localhost:7000/api/User?userName={username}");
-
-            // Добавление кастомного заголовка
             request.Headers.Add("X-Source", _source.Token);
 
-            // Отправка запроса
             var response = await _httpClient.SendAsync(request);
-
-            //var response = await _httpClient.GetAsync($"https://localhost:7000/api/User?userName={username}");
             
             return response;
         }
