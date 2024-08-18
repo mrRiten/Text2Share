@@ -23,7 +23,7 @@ namespace TextMicroService.API.Migrations
                     DateOfChange = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsPublic = table.Column<bool>(type: "bit", nullable: false),
                     LikeCount = table.Column<int>(type: "int", nullable: false),
-                    Slug = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false)
+                    PrivetToken = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

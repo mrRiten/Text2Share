@@ -12,8 +12,8 @@ using TextMicroService.Core;
 namespace TextMicroService.API.Migrations
 {
     [DbContext(typeof(TextMicroServiceContext))]
-    [Migration("20240710100207_delSlug")]
-    partial class delSlug
+    [Migration("20240714185948_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,6 +48,10 @@ namespace TextMicroService.API.Migrations
 
                     b.Property<int>("LikeCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("PrivetToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");

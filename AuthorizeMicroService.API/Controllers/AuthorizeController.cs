@@ -7,18 +7,25 @@ namespace AuthorizeMicroService.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthorizeController(IAuthorizeService authorizeService, HttpClient httpClient,
-        IJwtHelper jwtHelper, IHttpHelper httpHelper) : ControllerBase
+    public class AuthorizeController(IAuthorizeService authorizeService, IJwtHelper jwtHelper, 
+        IHttpHelper httpHelper) : ControllerBase
     {
-        private readonly IAuthorizeService _authorizeService = authorizeService;
-        private readonly HttpClient _httpClient = httpClient;
-        private readonly IJwtHelper _jwtHelper = jwtHelper;
-        private readonly IHttpHelper _httpHelper = httpHelper;
+        private readonly IAuthorizeService _authorizeService = authorizeService
+            ?? throw new ArgumentNullException(nameof(authorizeService));
+        private readonly IJwtHelper _jwtHelper = jwtHelper
+            ?? throw new ArgumentNullException(nameof(jwtHelper));
+        private readonly IHttpHelper _httpHelper = httpHelper
+            ?? throw new ArgumentNullException(nameof(httpHelper));
 
         // POST: api/<AuthorizeController>/Confirm/{userId}?token={token}
         [HttpGet("Confirm/{userId}")]
         public async Task<IActionResult> Confirm(int userId, string token)
         {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return BadRequest("Token is required.");
+            }
+
             await _authorizeService.Confirm(userId, token);
 
             return Ok();

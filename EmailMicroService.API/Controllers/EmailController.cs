@@ -9,7 +9,8 @@ namespace EmailMicroService.API.Controllers
     [ApiController]
     public class EmailController(IEmailService emailService) : ControllerBase
     {
-        private readonly IEmailService _emailService = emailService;
+        private readonly IEmailService _emailService = emailService
+            ?? throw new ArgumentNullException(nameof(emailService));
 
         // POST api/<EmailController>
         [HttpPost]

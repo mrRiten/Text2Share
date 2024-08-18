@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using UserMicroService.Core;
 
@@ -11,9 +12,11 @@ using UserMicroService.Core;
 namespace UserMicroService.API.Migrations
 {
     [DbContext(typeof(UserMicroServiceContext))]
-    partial class UserMicroServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20240724125326_Token")]
+    partial class Token
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

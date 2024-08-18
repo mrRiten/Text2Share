@@ -19,7 +19,7 @@ namespace UserMicroService.API.Controllers
         private readonly IWebHostEnvironment _webHostEnvironment = webEnvironment;
 
         // GET: api/<UserController>/1
-        [HttpGet("{userId}")]
+        [HttpGet("{userId:int}")]
         public async Task<IActionResult> Get(int userId)
         {
             var user = await _userService.GetUserAsync(userId);

@@ -52,10 +52,7 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
-builder.Services.AddControllers(options =>
-{
-    options.Filters.AddService<ValidateSourceFilter>();
-})
+builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
     {
         options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();

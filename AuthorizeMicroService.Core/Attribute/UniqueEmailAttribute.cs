@@ -6,19 +6,21 @@ namespace AuthorizeMicroService.Core.Attributes
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
-            var dbContext = (AuthorizeMicroServiceContext)validationContext.GetService(typeof(AuthorizeMicroServiceContext))
-                ?? throw new InvalidOperationException("DbContext не может быть определен.");
-
-            var email = (string)value;
-
-            var user = dbContext.Users.FirstOrDefault(u => u.UserEmail == email);
-
-            if (user != null)
+            if (value is not string email)
             {
-                return new ValidationResult("Пользователь с этой почтой уже существует.");
+                return new ValidationResult("Value must be string");
             }
 
-            return ValidationResult.Success;
+            if (validationContext.GetService(typeof(AuthorizeMicroServiceContext)) is not AuthorizeMicroServiceContext dbContext)
+            {
+                throw new InvalidOperationException("Can`t get dbContext");
+            }
+
+            bool emailExists = dbContext.Users.Any(u => u.UserEmail == email);
+
+            return emailExists
+                ? new ValidationResult("A user with that email already exists.")
+                : ValidationResult.Success;
         }
     }
 }

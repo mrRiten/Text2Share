@@ -12,7 +12,7 @@ using UserMicroService.Core;
 namespace UserMicroService.API.Migrations
 {
     [DbContext(typeof(UserMicroServiceContext))]
-    [Migration("20240712133336_Init")]
+    [Migration("20240714190535_Init")]
     partial class Init
     {
         /// <inheritdoc />

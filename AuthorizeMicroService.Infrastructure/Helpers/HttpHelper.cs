@@ -13,6 +13,8 @@ namespace AuthorizeMicroService.Infrastructure.Helpers
 
         public async Task<HttpResponseMessage> CreateEmailAsync(User user)
         {
+            ArgumentNullException.ThrowIfNull(user);
+
             var email = new Email
             {
                 UserEmail = user.UserEmail,
@@ -29,33 +31,6 @@ namespace AuthorizeMicroService.Infrastructure.Helpers
 
             var response = await _httpClient.SendAsync(request);
 
-            return response;
-        }
-
-        public async Task<User?> CreateUserAsync(User user)
-        {
-            var userContent = new StringContent(JsonConvert.SerializeObject(user), Encoding.UTF8, "application/json");
-            // Query to User Service for create user
-            var response = await _httpClient.PostAsync("https://localhost:7000/api/User", userContent);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseContent = await response.Content.ReadAsStringAsync();
-                var newUser = JsonConvert.DeserializeObject<User>(responseContent);
-
-                return newUser;
-            }
-
-            return null;
-        }
-
-        public async Task<HttpResponseMessage> GetUserAsync(string username)
-        {
-            var request = new HttpRequestMessage(new HttpMethod("GET"), $"https://localhost:7000/api/User?userName={username}");
-            request.Headers.Add("X-Source", _source.Token);
-
-            var response = await _httpClient.SendAsync(request);
-            
             return response;
         }
     }

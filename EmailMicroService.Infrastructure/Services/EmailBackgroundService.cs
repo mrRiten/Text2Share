@@ -26,7 +26,7 @@ namespace EmailMicroService.Infrastructure.Services
             }
             catch (OperationCanceledException)
             {
-                // Handle the task cancellation, if needed
+                _logger.LogInformation("Timed Hosted Service is stopping due to cancellation.");
             }
             finally
             {
@@ -38,28 +38,26 @@ namespace EmailMicroService.Infrastructure.Services
         {
             _logger.LogInformation("Timed Hosted Service is working.");
 
-            using (var scope = _serviceScopeFactory.CreateScope())
+            using var scope = _serviceScopeFactory.CreateScope();
+            var emailRepository = scope.ServiceProvider.GetRequiredService<IEmailRepository>();
+            var emailSenderService = scope.ServiceProvider.GetRequiredService<IEmailSenderService>();
+
+            var emails = await emailRepository.GetAllAsync();
+
+            foreach (var email in emails)
             {
-                var emailRepository = scope.ServiceProvider.GetRequiredService<IEmailRepository>();
-                var emailSenderService = scope.ServiceProvider.GetRequiredService<IEmailSenderService>();
-
-                var emails = await emailRepository.GetAllAsync();
-
-                foreach (var email in emails)
+                try
                 {
-                    try
-                    {
-                        await emailSenderService.SendEmailAsync(email.UserEmail, "Confirm", email.Data);
-                    }
-                    catch (MimeKit.ParseException)
-                    {
-                        continue;
-                    }
-                    
+                    await emailSenderService.SendEmailAsync(email.UserEmail, "Confirm", email.Data);
                 }
-
-                await emailRepository.DeleteAsync([.. emails]);
+                catch (MimeKit.ParseException ex)
+                {
+                    _logger.LogError(ex, $"Failed to send email to {email.UserEmail}");
+                    continue;
+                }
             }
+
+            await emailRepository.DeleteAsync([ ..emails]);
         }
 
         public override async Task StopAsync(CancellationToken stoppingToken)

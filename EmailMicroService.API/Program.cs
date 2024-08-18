@@ -30,9 +30,7 @@ builder.Services.Configure<XSource>(builder.Configuration.GetSection("SourceToke
 
 builder.Services.AddHttpClient();
 
-builder.Services.AddControllers(options =>
-    options.Filters.AddService<ValidateSourceFilter>()
-);
+builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -2,17 +2,21 @@
 
 #nullable disable
 
-namespace TextMicroService.API.Migrations
+namespace EmailMicroService.API.Migrations
 {
     /// <inheritdoc />
-    public partial class Token : Migration
+    public partial class email : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropColumn(
+                name: "UserId",
+                table: "Emails");
+
             migrationBuilder.AddColumn<string>(
-                name: "PrivetToken",
-                table: "Texts",
+                name: "UserEmail",
+                table: "Emails",
                 type: "nvarchar(max)",
                 nullable: false,
                 defaultValue: "");
@@ -22,8 +26,15 @@ namespace TextMicroService.API.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "PrivetToken",
-                table: "Texts");
+                name: "UserEmail",
+                table: "Emails");
+
+            migrationBuilder.AddColumn<int>(
+                name: "UserId",
+                table: "Emails",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
         }
     }
 }
