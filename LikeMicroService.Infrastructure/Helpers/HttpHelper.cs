@@ -9,69 +9,62 @@ namespace LikeMicroService.Infrastructure.Helpers
 {
     public class HttpHelper(HttpClient httpClient, IOptions<XSource> source) : IHttpHelper
     {
-        private readonly HttpClient _httpClient = httpClient;
-        private readonly XSource _source = source.Value;
+        private readonly HttpClient _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        private readonly XSource _source = source?.Value ?? throw new ArgumentNullException(nameof(source));
 
         public async Task<HttpResponseMessage?> EditTextLikeAsync(LikeAction likeAction, int textId)
         {
-            // Создание запроса с методом Get
-            var request = new HttpRequestMessage(new HttpMethod("GET"), $"https://localhost:7000/api/Text/{textId}");
+            // Create GET-request for get text
+            var getRequest = new HttpRequestMessage(HttpMethod.Get, $"https://localhost:7000/api/Text/{textId}");
+            getRequest.Headers.Add("X-Source", _source.Token);
 
-            // Добавление кастомного заголовка
-            request.Headers.Add("X-Source", _source.Token);
-
-            // Отправка запроса
-            var response = await _httpClient.SendAsync(request);
-
-            // Получение текста
-            //var response = await _httpClient.GetAsync($"https://localhost:7000/api/Text/{textId}");
-
-            if (!response.IsSuccessStatusCode) { return null; }
+            var response = await _httpClient.SendAsync(getRequest);
+            if (!response.IsSuccessStatusCode) return null;
 
             var textJson = await response.Content.ReadAsStringAsync();
             var text = JsonConvert.DeserializeObject<Text>(textJson);
+            if (text == null) return null;
 
-            // Подготовка данных JSON Patch
-            var patchData = new PatchRequest[1];
-
-            if (likeAction == LikeAction.Plus)
+            // Compose data JSON Patch
+            var patchValue = likeAction == LikeAction.Plus ? text.LikeCount + 1 : text.LikeCount - 1;
+            var patchData = new[]
             {
-                patchData[0] = new PatchRequest { Op = "replace", Path = "/LikeCount", Value = $"{text.LikeCount + 1}" };
-            }
-            else if (likeAction == LikeAction.Minus)
-            {
-                patchData[0] = new PatchRequest { Op = "replace", Path = "/LikeCount", Value = $"{text.LikeCount - 1}" };
-            }
-
-            var jsonPatch = JsonConvert.SerializeObject(patchData);
-            var content = new StringContent(jsonPatch, Encoding.UTF8, "application/json-patch+json");
-
-            // Создание запроса с методом PATCH
-            request = new HttpRequestMessage(new HttpMethod("PATCH"), $"https://localhost:7000/api/Text/{textId}")
-            {
-                Content = content
+                new PatchRequest
+                {
+                    Op = "replace",
+                    Path = "/LikeCount",
+                    Value = patchValue.ToString()
+                }
             };
 
-            // Добавление кастомного заголовка
-            request.Headers.Add("X-Source", _source.Token);
+            var jsonPatch = JsonConvert.SerializeObject(patchData);
+            var patchContent = new StringContent(jsonPatch, Encoding.UTF8, "application/json-patch+json");
 
-            // Отправка запроса
-            response = await _httpClient.SendAsync(request);
+            // Create PATCH-request for update text
+            var patchRequest = new HttpRequestMessage(HttpMethod.Patch, $"https://localhost:7000/api/Text/{textId}")
+            {
+                Content = patchContent
+            };
+            patchRequest.Headers.Add("X-Source", _source.Token);
 
-            return response;
+            return await _httpClient.SendAsync(patchRequest);
         }
-
 
         public async Task<HttpResponseMessage> GetUserAsync(string userName)
         {
+            if (string.IsNullOrWhiteSpace(userName))
+            {
+                throw new ArgumentException("User name cannot be null or whitespace.", nameof(userName));
+            }
+
             return await _httpClient.GetAsync($"https://localhost:7000/api/User?userName={userName}");
         }
 
-        public class PatchRequest
+        private class PatchRequest
         {
-            public string Op { get; set; }
-            public string Path { get; set; }
-            public string Value { get; set; }
+            public required string Op { get; set; }
+            public required string Path { get; set; }
+            public required string Value { get; set; }
         }
     }
 }

@@ -45,7 +45,7 @@ namespace AuthorizeMicroService.API.Controllers
 
                 if (result)
                 {
-                    var jwtToken = _jwtHelper.GenerateJwtToken(userLogin.Login);
+                    var jwtToken = _jwtHelper.GenerateJwtToken(user.UserName);
                     return Ok(jwtToken);
                 }
 

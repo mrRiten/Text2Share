@@ -1,7 +1,6 @@
 ﻿using LikeMicroService.Application.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel;
 
 namespace LikeMicroService.API.Controllers
 {
@@ -37,7 +36,7 @@ namespace LikeMicroService.API.Controllers
         public async Task<IActionResult> Delete(int textId)
         {
             await _likeService.DeleteLikeAsync(textId);
-            
+
             return Ok();
         }
     }
