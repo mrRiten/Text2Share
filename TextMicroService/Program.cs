@@ -11,6 +11,8 @@ using TextMicroService.Infrastructure.Repositories;
 using TextMicroService.Infrastructure.Services;
 using Newtonsoft.Json.Serialization;
 using TextMicroService.Core.Attributes;
+using TextMicroService.Application.Helpers;
+using TextMicroService.Infrastructure.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,15 +24,20 @@ builder.Services.AddDbContext<TextMicroServiceContext>(options =>
         b => b.MigrationsAssembly("TextMicroService.API")),
         ServiceLifetime.Scoped);
 
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
+
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.AddScoped<ITextRepository, TextRepository>();
 builder.Services.AddScoped<ITextService, TextService>();
+builder.Services.AddScoped<IHttpHelper, HttpHelper>();
 
 builder.Services.AddScoped<ValidateSourceFilter>();
 
 builder.Services.Configure<XSource>(builder.Configuration.GetSection("SourceToken"));
 
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>() ??
+    throw new ArgumentNullException("Can`t find JwtSettings in appsettings.json");
 
 builder.Services.AddAuthentication(options =>
 {

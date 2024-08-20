@@ -45,6 +45,43 @@ namespace TextMicroService.API.Controllers
             return Ok(text);
         }
 
+        // GET: api/Text/account/privet/{userId}
+        [HttpGet("account/public/{userId}")]
+        public async Task<IActionResult> GetByUser(int userId)
+        {
+            ICollection<Text> text;
+            if (HttpContext.Request.Headers["X-Source"] == _source.Token)
+            {
+                text = await _textService.GetAllTextByUserAsync(userId, true);
+            }
+            else
+            {
+                text = await _textService.GetAllTextByUserAsync(userId, false);
+            }
+
+            if (text == null)
+            {
+                return BadRequest("No items");
+            }
+
+            return Ok(text);
+        }
+
+        // GET: api/Text/account/text
+        [HttpGet("account/privet")]
+        [Authorize]
+        public async Task<IActionResult> GetByAccount()
+        {
+            var text = await _textService.GetAllUserTextAsync();
+
+            if (text == null || text.Count == 0)
+            {
+                return NoContent();
+            }
+
+            return Ok(text);
+        }
+
         // GET: api/Text/byToken/{token}
         [HttpGet("byToken/{token}")]
         public async Task<IActionResult> GetByToken(string token)
@@ -89,6 +126,14 @@ namespace TextMicroService.API.Controllers
         public async Task<IActionResult> Patch(int id, [FromBody] JsonPatchDocument<Text> patchDoc)
         {
             if (patchDoc == null) { return BadRequest(); }
+
+            foreach (var operation in patchDoc.Operations)
+            {
+                if (!_textService.IsAllowedPath(operation.path))
+                {
+                    return BadRequest($"Modification of the '{operation.path}' field is not allowed.");
+                }
+            }
 
             var text = await _textService.GetTextAsync(id, true);
 

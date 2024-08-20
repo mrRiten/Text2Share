@@ -130,6 +130,7 @@
       "UpstreamPathTemplate": "/api/Authorize/Confirm/{userId}",
       "UpstreamHttpMethod": [ "GET" ]
     },
+
     {
       "DownstreamPathTemplate": "/api/Authorize/Login",
       "DownstreamScheme": "https",
@@ -142,6 +143,7 @@
       "UpstreamPathTemplate": "/api/Authorize/Login",
       "UpstreamHttpMethod": [ "POST" ]
     },
+
     {
       "DownstreamPathTemplate": "/api/Authorize/Register",
       "DownstreamScheme": "https",
@@ -167,6 +169,36 @@
       ],
       "UpstreamPathTemplate": "/api/Text",
       "UpstreamHttpMethod": [ "GET" ]
+    },
+
+    {
+      "DownstreamPathTemplate": "/api/Text/account/public/{userId}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7002
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Text/account/public/{userId}",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+
+    {
+      "DownstreamPathTemplate": "/api/Text/account/privet",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 7002
+        }
+      ],
+      "UpstreamPathTemplate": "/api/Text/account/privet",
+      "UpstreamHttpMethod": [ "GET" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      }
     },
 
     {

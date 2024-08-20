@@ -1,13 +1,21 @@
-﻿using System.Security.Cryptography;
+﻿using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using TextMicroService.Application.Helpers;
 using TextMicroService.Application.Repositories;
 using TextMicroService.Application.Services;
 using TextMicroService.Core.Models;
+using UserMicroService.Core.Models;
 
 namespace TextMicroService.Infrastructure.Services
 {
-    public class TextService(ITextRepository textRepository) : ITextService
+    public class TextService(ITextRepository textRepository, IHttpContextAccessor httpContextAccessor,
+        IHttpHelper httpHelper) : ITextService
     {
         private readonly ITextRepository _textRepository = textRepository;
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+        private readonly IHttpHelper _httpHelper = httpHelper;
 
         public async Task CreateTextAsync(TextUpload model)
         {
@@ -80,9 +88,16 @@ namespace TextMicroService.Infrastructure.Services
             return texts;
         }
 
-        public async Task<ICollection<Text>> GetAllUserTextAsync(int userId)
+        public async Task<ICollection<Text>?> GetAllUserTextAsync()
         {
-            var texts = await _textRepository.GetAllByUserAsync(userId);
+            var user = await GetUserRequestDataAsync();
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            var texts = await _textRepository.GetAllByUserAsync(user.Id);
 
             foreach (var text in texts)
             {
@@ -115,9 +130,30 @@ namespace TextMicroService.Infrastructure.Services
             return await _textRepository.GetAsync(privetToken);
         }
 
+        public bool IsAllowedPath(string path)
+        {
+            return path.Equals("/Data", StringComparison.OrdinalIgnoreCase) ||
+                path.Equals("/DateOfChange", StringComparison.OrdinalIgnoreCase) ||
+                path.Equals("/IsPublic", StringComparison.OrdinalIgnoreCase) ||
+                path.Equals("/LikeCount", StringComparison.OrdinalIgnoreCase);
+        }
+
         public async Task UpdateTextAsync(Text text)
         {
             await _textRepository.UpdateAsync(text);
+        }
+
+        private async Task<UserDTO?> GetUserRequestDataAsync()
+        {
+            var userName = _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Name)?.Value;
+
+            if (userName == null) { return null; }
+
+            var response = await _httpHelper.GetUserAsync(userName);
+
+            var user = JsonConvert.DeserializeObject<UserDTO>(await response.Content.ReadAsStringAsync());
+
+            return user;
         }
     }
 }
