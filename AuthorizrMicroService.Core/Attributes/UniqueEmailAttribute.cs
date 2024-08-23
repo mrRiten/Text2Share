@@ -23,5 +23,4 @@ namespace UserMicroService.Core.Attributes
                 : ValidationResult.Success;
         }
     }
-    }
 }

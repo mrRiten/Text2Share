@@ -11,12 +11,11 @@ namespace UserMicroService.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class UserController(IUserService userService, IImageService imageService, 
-        IOptions<XSource> source, IWebHostEnvironment webEnvironment) : ControllerBase
+        IOptions<XSource> source) : ControllerBase
     {
         private readonly IUserService _userService = userService;
         private readonly IImageService _imageService = imageService;
         private readonly XSource _source = source.Value;
-        private readonly IWebHostEnvironment _webHostEnvironment = webEnvironment;
 
         // GET: api/<UserController>/1
         [HttpGet("{userId:int}")]

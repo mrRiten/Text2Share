@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AspireApp\AspireApp.ServiceDefaults\AspireApp.ServiceDefaults.csproj" />
     <ProjectReference Include="..\UserMicroService.Infrastructure\UserMicroService.Infrastructure.csproj" />
   </ItemGroup>
 
