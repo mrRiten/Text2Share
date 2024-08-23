@@ -73,20 +73,14 @@ namespace UserMicroService.API.Controllers
         {
             try
             {
-                var imageUrlTask = _imageService.UploadUserImageAsync(userImage.Image);
-                var userTask = _userService.GetFullUserAsync();
+                var user = await _userService.GetFullUserAsync();
+                if (user == null)
+                    return NotFound("User not found");
 
-                await Task.WhenAll(imageUrlTask, userTask);
-
-                var imageUrl = await imageUrlTask;
-                var user = await userTask;
-
-                if (user == null) { return NotFound("User is not found"); }
-
+                var imageUrl = await _imageService.UploadUserImageAsync(userImage.Image);
                 user.UserImagePath = imageUrl;
 
                 await _userService.UpdateUserAsync(user);
-
                 return Ok("User's image updated");
             }
             catch (ArgumentException ex)
@@ -101,20 +95,18 @@ namespace UserMicroService.API.Controllers
 
         [HttpPost("ChangePassword")]
         [Authorize]
-        public async Task<IActionResult> ChangePassword([FromForm] string newPassword, [FromForm] string oldPassword)
+        public async Task<IActionResult> ChangePassword([FromForm] string newPassword, 
+            [FromForm] string oldPassword)
         {
             var user = await _userService.GetFullUserAsync();
+            if (user == null)
+                return NotFound("User not found");
 
-            if (user == null) { return NotFound("User is not found"); }
+            var isPasswordChanged = await _userService.SetNewPasswordAsync(oldPassword, newPassword, user);
+            if (!isPasswordChanged)
+                return BadRequest("Old password is not valid");
 
-            var result = await _userService.SetNewPassword(oldPassword, newPassword, user);
-
-            if (!result)
-            {
-                return Ok("Old password is not valid");
-            }
-
-            return Ok("Password is change");
+            return Ok("Password has been changed");
         }
 
         // PATCH: api/<UserController>/update
@@ -122,37 +114,31 @@ namespace UserMicroService.API.Controllers
         [Authorize]
         public async Task<IActionResult> Patch([FromBody] JsonPatchDocument<User> patchDoc)
         {
+            if (patchDoc == null)
+                return BadRequest("Patch document is null");
+
             if (HttpContext.Request.Headers["X-Source"] != _source.Token)
             {
-                foreach (var operation in patchDoc.Operations)
-                {
-                    if (!_userService.IsAllowedPath(operation.path))
-                    {
-                        return BadRequest($"Modification of the '{operation.path}' field is not allowed.");
-                    }
-                }
+                if (HasInvalidPatchOperations(patchDoc))
+                    return BadRequest("Modification of one or more fields is not allowed");
             }
 
             var user = await _userService.GetFullUserAsync();
+            if (user == null)
+                return NotFound();
 
-            if (user == null) { return NotFound(); }
-
-            patchDoc.ApplyTo(user, (patchError) =>
-            {
-                ModelState.AddModelError(patchError.AffectedObject.ToString(), patchError.ErrorMessage);
-            });
+            patchDoc.ApplyTo(user, ModelState);
 
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
             await _userService.UpdateUserAsync(user);
-
             return Ok();
         }
 
-
-
+        private bool HasInvalidPatchOperations(JsonPatchDocument<User> patchDoc)
+        {
+            return patchDoc.Operations.Any(op => !_userService.IsAllowedPath(op.path));
+        }
     }
 }

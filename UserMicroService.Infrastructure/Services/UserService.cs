@@ -7,8 +7,8 @@ using UserMicroService.Core.Models;
 
 namespace UserMicroService.Infrastructure.Services
 {
-    public class UserService(IUserRepository userRepository, IHttpContextAccessor httpContextAccessor,
-        IHttpHelper httpHelper) : IUserService
+    public class UserService(IUserRepository userRepository, 
+        IHttpContextAccessor httpContextAccessor) : IUserService
     {
         private readonly IUserRepository _userRepository = userRepository;
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
@@ -18,9 +18,22 @@ namespace UserMicroService.Infrastructure.Services
             await _userRepository.CreateAsync(user);
         }
 
-        public async Task<User?> GetFullUserAsync()
+        public async Task<UserDTO?> GetUserAsync(string userName)
         {
-            return await GetUserRequestDataAsync();
+            var user = await _userRepository.GetAsync(userName);
+            return user == null ? null : new UserDTO(user);
+        }
+
+        public async Task<UserDTO?> GetUserAsync(int userId)
+        {
+            var user = await _userRepository.GetAsync(userId);
+            return user == null ? null : new UserDTO(user);
+        }
+
+        public async Task<UserDTO?> GetUserAsync()
+        {
+            var user = await GetUserRequestDataAsync();
+            return user == null ? null : new UserDTO(user);
         }
 
         public async Task<User?> GetFullUserAsync(string userName)
@@ -28,37 +41,9 @@ namespace UserMicroService.Infrastructure.Services
             return await _userRepository.GetAsync(userName);
         }
 
-        public async Task<UserDTO?> GetUserAsync(string userName)
+        public async Task<User?> GetFullUserAsync()
         {
-            var user = await _userRepository.GetAsync(userName);
-
-            if (user == null) { return null; }
-
-            var userDTO = new UserDTO(user);
-
-            return userDTO;
-        }
-
-        public async Task<UserDTO?> GetUserAsync(int userId)
-        {
-            var user = await _userRepository.GetAsync(userId);
-
-            if (user == null) { return null; }
-
-            var userDTO = new UserDTO(user);
-
-            return userDTO;
-        }
-
-        public async Task<UserDTO?> GetUserAsync()
-        {
-            var user = await GetUserRequestDataAsync();
-
-            if (user == null) { return null; }
-
-            var userDTO = new UserDTO(user);
-
-            return userDTO;
+            return await GetUserRequestDataAsync();
         }
 
         public bool IsAllowedPath(string path)
@@ -66,11 +51,14 @@ namespace UserMicroService.Infrastructure.Services
             return path.Equals("/UserName", StringComparison.OrdinalIgnoreCase);
         }
 
-        public async Task<bool> SetNewPassword(string oldPassword, string newPassword, User user)
+        public async Task<bool> SetNewPasswordAsync(string oldPassword, string newPassword, User user)
         {
-            if (!BCrypt.Net.BCrypt.Verify(oldPassword, user.Password)) { return false; }
+            if (!VerifyOldPassword(oldPassword, user.Password))
+            {
+                return false;
+            }
 
-            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.Password = HashNewPassword(newPassword);
             await _userRepository.UpdateAsync(user);
 
             return true;
@@ -83,13 +71,23 @@ namespace UserMicroService.Infrastructure.Services
 
         private async Task<User?> GetUserRequestDataAsync()
         {
-            var userName = _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Name)?.Value;
+            var userName = GetUserNameFromClaims();
+            return userName == null ? null : await _userRepository.GetAsync(userName);
+        }
 
-            if (userName == null) { return null; }
+        private string? GetUserNameFromClaims()
+        {
+            return _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Name)?.Value;
+        }
 
-            var user = await _userRepository.GetAsync(userName);
+        private bool VerifyOldPassword(string oldPassword, string hashedPassword)
+        {
+            return BCrypt.Net.BCrypt.Verify(oldPassword, hashedPassword);
+        }
 
-            return user;
+        private string HashNewPassword(string newPassword)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(newPassword);
         }
     }
 }

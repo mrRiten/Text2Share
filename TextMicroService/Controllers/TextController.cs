@@ -12,8 +12,10 @@ namespace TextMicroService.API.Controllers
     [ApiController]
     public class TextController(ITextService textService, IOptions<XSource> source) : ControllerBase
     {
-        private readonly ITextService _textService = textService;
-        private readonly XSource _source = source.Value;
+        private readonly ITextService _textService = textService
+            ?? throw new ArgumentNullException(nameof(textService));
+        private readonly XSource _source = source.Value
+            ?? throw new ArgumentNullException(nameof(source));
 
         // GET: api/Text
         [HttpGet]
@@ -27,47 +29,33 @@ namespace TextMicroService.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> Get(int id)
         {
-            Text? text;
-            if (HttpContext.Request.Headers["X-Source"] == _source.Token)
-            {
-                text = await _textService.GetTextAsync(id, true);
-            }
-            else
-            {
-                text = await _textService.GetTextAsync(id, false);
-            }
+            var isAdmin = IsRequestFromSource();
+            var text = await _textService.GetTextAsync(id, isAdmin);
 
             if (text == null)
             {
-                return BadRequest("No items");
+                return NotFound("No items");
             }
 
             return Ok(text);
         }
 
-        // GET: api/Text/account/privet/{userId}
+        // GET: api/Text/account/public/{userId}
         [HttpGet("account/public/{userId}")]
         public async Task<IActionResult> GetByUser(int userId)
         {
-            ICollection<Text> text;
-            if (HttpContext.Request.Headers["X-Source"] == _source.Token)
-            {
-                text = await _textService.GetAllTextByUserAsync(userId, true);
-            }
-            else
-            {
-                text = await _textService.GetAllTextByUserAsync(userId, false);
-            }
+            var isAdmin = IsRequestFromSource();
+            var text = await _textService.GetAllTextByUserAsync(userId, isAdmin);
 
-            if (text == null)
+            if (text == null || text.Count == 0)
             {
-                return BadRequest("No items");
+                return NotFound("No items");
             }
 
             return Ok(text);
         }
 
-        // GET: api/Text/account/text
+        // GET: api/Text/account/privet
         [HttpGet("account/privet")]
         [Authorize]
         public async Task<IActionResult> GetByAccount()
@@ -96,19 +84,18 @@ namespace TextMicroService.API.Controllers
             return Ok(text);
         }
 
-        // GET: api/Text/token/{textId}
+        // GET: api/Text/token/{textId:int}
         [HttpGet("token/{textId:int}")]
         [Authorize]
         public async Task<IActionResult> GetToken(int textId)
         {
-            var textToken = (await _textService.GetTextAsync(textId, true))?.PrivetToken;
-
-            if (textToken == null)
+            var text = await _textService.GetTextAsync(textId, true);
+            if (text?.PrivetToken == null)
             {
                 return NotFound();
             }
 
-            return Ok(textToken);
+            return Ok(text.PrivetToken);
         }
 
         // POST: api/Text
@@ -117,7 +104,7 @@ namespace TextMicroService.API.Controllers
         public async Task<IActionResult> Post(TextUpload model)
         {
             await _textService.CreateTextAsync(model);
-            return Ok();
+            return CreatedAtAction(nameof(Get), new { id = model.UserId }, model);
         }
 
         // PATCH: api/Text/5
@@ -125,7 +112,7 @@ namespace TextMicroService.API.Controllers
         [ServiceFilter(typeof(ValidateSourceFilter))]
         public async Task<IActionResult> Patch(int id, [FromBody] JsonPatchDocument<Text> patchDoc)
         {
-            if (patchDoc == null) { return BadRequest(); }
+            if (patchDoc == null) return BadRequest();
 
             foreach (var operation in patchDoc.Operations)
             {
@@ -136,21 +123,15 @@ namespace TextMicroService.API.Controllers
             }
 
             var text = await _textService.GetTextAsync(id, true);
+            if (text == null) return NotFound();
 
-            if (text == null) { return NotFound(); }
-
-            patchDoc.ApplyTo(text, (patchError) =>
-            {
-                ModelState.AddModelError(patchError.AffectedObject.ToString(), patchError.ErrorMessage);
-            });
-
+            patchDoc.ApplyTo(text, ModelState);
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return UnprocessableEntity(ModelState);
             }
 
             await _textService.UpdateTextAsync(text);
-
             return Ok();
         }
 
@@ -160,7 +141,12 @@ namespace TextMicroService.API.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             await _textService.DeleteTextAsync(id);
-            return Ok();
+            return NoContent();
+        }
+
+        private bool IsRequestFromSource()
+        {
+            return HttpContext.Request.Headers["X-Source"] == _source.Token;
         }
     }
 }

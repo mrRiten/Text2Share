@@ -10,7 +10,7 @@ using UserMicroService.Core.Models;
 
 namespace TextMicroService.Infrastructure.Services
 {
-    public class TextService(ITextRepository textRepository, IHttpContextAccessor httpContextAccessor,
+    public class TextService(ITextRepository textRepository, IHttpContextAccessor httpContextAccessor, 
         IHttpHelper httpHelper) : ITextService
     {
         private readonly ITextRepository _textRepository = textRepository;
@@ -19,21 +19,15 @@ namespace TextMicroService.Infrastructure.Services
 
         public async Task CreateTextAsync(TextUpload model)
         {
-            byte[] randomBytes = new byte[32 / 2];
-
-            using (var rng = RandomNumberGenerator.Create())
-            {
-                rng.GetBytes(randomBytes);
-            }
-
+            var randomBytes = GenerateRandomBytes(16);
             var text = new Text
             {
                 Data = model.Data,
                 UserId = model.UserId,
                 IsPublic = model.IsPublic,
-                DateOfCreate = DateTime.Now,
-                DateOfChange = DateTime.Now,
-                PrivetToken = BitConverter.ToString(randomBytes).Replace("-", "")
+                DateOfCreate = DateTime.UtcNow,
+                DateOfChange = DateTime.UtcNow,
+                PrivetToken = ConvertToHex(randomBytes)
             };
 
             await _textRepository.CreateAsync(text);
@@ -43,86 +37,43 @@ namespace TextMicroService.Infrastructure.Services
         {
             var text = await _textRepository.GetAsync(id);
 
-            if (text == null) { return; }
+            if (text == null) return;
 
             await _textRepository.DeleteAsync(text);
         }
 
         public async Task<ICollection<Text>> GetAllTextAsync(bool isAdmin)
         {
-            ICollection<Text> texts;
-            if (isAdmin)
-            {
-                texts = await _textRepository.AdminGetAllAsync();
-            }
-            else
-            {
-                texts = await _textRepository.GetAllAsync();
-            }
+            var texts = isAdmin
+                ? await _textRepository.AdminGetAllAsync()
+                : await _textRepository.GetAllAsync();
 
-            foreach (var text in texts)
-            {
-                text.DeletePrivetToken();
-            }
-
-            return texts;
+            return RemovePrivateTokens(texts);
         }
 
         public async Task<ICollection<Text>> GetAllTextByUserAsync(int userId, bool isAdmin)
         {
-            ICollection<Text> texts;
-            if (isAdmin)
-            {
-                texts = await _textRepository.GetAllByUserAsync(userId);
-            }
-            else
-            {
-                texts = await _textRepository.GetAllPublicByUserAsync(userId);
-            }
+            var texts = isAdmin
+                ? await _textRepository.GetAllByUserAsync(userId)
+                : await _textRepository.GetAllPublicByUserAsync(userId);
 
-            foreach (var text in texts)
-            {
-                text.DeletePrivetToken();
-            }
-
-            return texts;
+            return RemovePrivateTokens(texts);
         }
 
         public async Task<ICollection<Text>?> GetAllUserTextAsync()
         {
             var user = await GetUserRequestDataAsync();
-
-            if (user == null)
-            {
-                return null;
-            }
+            if (user == null) return null;
 
             var texts = await _textRepository.GetAllByUserAsync(user.Id);
-
-            foreach (var text in texts)
-            {
-                text.DeletePrivetToken();
-            }
-
-            return texts;
+            return RemovePrivateTokens(texts);
         }
 
         public async Task<Text?> GetTextAsync(int id, bool isAdmin)
         {
-            Text? text;
-
-            if (isAdmin)
-            {
-                text = await _textRepository.GetAsync(id);
-            }
-            else
-            {
-                text = await _textRepository.GetPublicAsync(id);
-            }
-
-            if (text != null) { return text; }
-
-            return text;
+            return isAdmin
+                ? await _textRepository.GetAsync(id)
+                : await _textRepository.GetPublicAsync(id);
         }
 
         public async Task<Text?> GetTextAsync(string privetToken)
@@ -133,9 +84,9 @@ namespace TextMicroService.Infrastructure.Services
         public bool IsAllowedPath(string path)
         {
             return path.Equals("/Data", StringComparison.OrdinalIgnoreCase) ||
-                path.Equals("/DateOfChange", StringComparison.OrdinalIgnoreCase) ||
-                path.Equals("/IsPublic", StringComparison.OrdinalIgnoreCase) ||
-                path.Equals("/LikeCount", StringComparison.OrdinalIgnoreCase);
+                   path.Equals("/DateOfChange", StringComparison.OrdinalIgnoreCase) ||
+                   path.Equals("/IsPublic", StringComparison.OrdinalIgnoreCase) ||
+                   path.Equals("/LikeCount", StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task UpdateTextAsync(Text text)
@@ -146,14 +97,34 @@ namespace TextMicroService.Infrastructure.Services
         private async Task<UserDTO?> GetUserRequestDataAsync()
         {
             var userName = _httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Name)?.Value;
-
-            if (userName == null) { return null; }
+            if (userName == null) return null;
 
             var response = await _httpHelper.GetUserAsync(userName);
+            return JsonConvert.DeserializeObject<UserDTO>(await response.Content.ReadAsStringAsync());
+        }
 
-            var user = JsonConvert.DeserializeObject<UserDTO>(await response.Content.ReadAsStringAsync());
+        private static byte[] GenerateRandomBytes(int length)
+        {
+            var randomBytes = new byte[length];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(randomBytes);
+            }
+            return randomBytes;
+        }
 
-            return user;
+        private static string ConvertToHex(byte[] bytes)
+        {
+            return BitConverter.ToString(bytes).Replace("-", "");
+        }
+
+        private static ICollection<Text> RemovePrivateTokens(ICollection<Text> texts)
+        {
+            foreach (var text in texts)
+            {
+                text.DeletePrivetToken();
+            }
+            return texts;
         }
     }
 }

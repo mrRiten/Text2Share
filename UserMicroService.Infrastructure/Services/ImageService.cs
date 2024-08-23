@@ -4,41 +4,61 @@ using UserMicroService.Application.Services;
 
 namespace UserMicroService.Infrastructure.Services
 {
-    public class ImageService(IWebHostEnvironment webHost) : IImageService
+    public class ImageService(IWebHostEnvironment webHostEnvironment) : IImageService
     {
-        private readonly IWebHostEnvironment _webHostEnvironment = webHost;
+        private readonly IWebHostEnvironment _webHostEnvironment = webHostEnvironment;
+        private readonly string[] _supportedTypes = ["jpg", "jpeg", "png", "gif"];
 
         public async Task<string> UploadUserImageAsync(IFormFile image)
         {
+            ValidateImage(image);
+            var fileName = GenerateUniqueFileName(image);
+            var filePath = GetFilePath(fileName);
+            await SaveImageAsync(image, filePath);
+
+            return Path.Combine("uploads", fileName); // Return the relative path to the file
+        }
+
+        private void ValidateImage(IFormFile image)
+        {
             if (image == null || image.Length == 0)
             {
-                throw new ArgumentException("No file upload");
+                throw new InvalidOperationException("No file uploaded.");
             }
 
-            // Check type if image
-            var supportedTypes = new[] { "jpg", "jpeg", "png", "gif" };
-            var fileExt = Path.GetExtension(image.FileName).Substring(1).ToLower();
-            if (!supportedTypes.Contains(fileExt))
+            var fileExt = Path.GetExtension(image.FileName)?.Substring(1).ToLower();
+            if (fileExt == null || !_supportedTypes.Contains(fileExt))
             {
-                throw new ArgumentException("Invalid file type. Only jpg, jpeg, png, and gif files are allowed.");
+                throw new InvalidOperationException("Invalid file type. Only jpg, jpeg, png, and gif files are allowed.");
             }
+        }
 
-            var fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);   // Unique ID for image
+        private string GenerateUniqueFileName(IFormFile image)
+        {
+            return Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+        }
 
-            // Add file to folder
-            var filePath = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", fileName);
+        private string GetFilePath(string fileName)
+        {
+            var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+            EnsureUploadsFolderExists(uploadsFolder);
+            return Path.Combine(uploadsFolder, fileName);
+        }
 
-            if (!Directory.Exists(Path.Combine(_webHostEnvironment.WebRootPath, "uploads")))
+        private void EnsureUploadsFolderExists(string uploadsFolder)
+        {
+            if (!Directory.Exists(uploadsFolder))
             {
-                Directory.CreateDirectory(Path.Combine(_webHostEnvironment.WebRootPath, "uploads"));
+                Directory.CreateDirectory(uploadsFolder);
             }
+        }
 
+        private async Task SaveImageAsync(IFormFile image, string filePath)
+        {
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 await image.CopyToAsync(stream);
             }
-
-            return Path.Combine("uploads", fileName);   // path to file
         }
     }
 }
